@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liberar Ajustes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn, .btn-realizados {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-realizados {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-realizados:hover {
+            background-color: #2980b9;
+        }
+
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .ajustes-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Liberar Ajustes</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="ajustes-section">
+            <h2>Ajustes Pendentes de Liberação</h2>
+            <div class="button-group">
+                <button class="btn-realizados" onclick="abrirAjustesRealizados()">Ajustes Realizados</button>
+            </div>
+            <table id="ajustesTable">
+                <thead>
+                    <tr>
+                        <th>Número do Ajuste</th>
+                        <th>Data/Hora</th>
+                        <th>Matrícula</th>
+                        <th>Nome do Usuário</th>
+                    </tr>
+                </thead>
+                <tbody id="ajustesBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/liberar_ajustes.js"></script>
+    <script>
+        function voltar() {
+            window.location.href = '/';
+        }
+        function logout() {
+            window.location.href = '/logout';
+        }
+        function abrirAjustesRealizados() {
+            window.location.href = '/ajustes_realizados';
+        }
+    </script>
+</body>
+</html>

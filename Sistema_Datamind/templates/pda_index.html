@@ -1,0 +1,1945 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Estoque - PDA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            font-size: 16px;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 20px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-criar-ajustes, .logout-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-criar-ajustes {
+            background-color: #2ecc71;
+        }
+
+        .btn-criar-ajustes:hover {
+            background-color: #27ae60;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            margin-top: 60px;
+            padding: 15px;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .ajuste-section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ajuste-section input[type="text"],
+        .ajuste-section input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .ajuste-section button:not(.btn-menos):not(.btn-mais):not(.btn-adicionar) {
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .ajuste-section button:not(.btn-menos):not(.btn-mais):not(.btn-adicionar):hover {
+            background-color: #2980b9;
+        }
+
+        #produtoInfo {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-size: 14px;
+            --texto-negrito-color: black;
+            --texto-normal-color: #061a8a;
+        }
+
+        #produtoInfo strong {
+            color: var(--texto-negrito-color);
+        }
+
+        #produtoInfo p {
+            color: var(--texto-normal-color);
+        }
+
+        #ajusteForm {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .ajuste-massa-section {
+            display: none;
+            gap: 10px;
+            margin: 10px 0;
+            flex-direction: column;
+        }
+
+        .ajuste-massa-section label {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantidade-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .quantidade-section input {
+            padding: 10px;
+            width: 100px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .ajuste-section .btn-menos {
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .ajuste-section .btn-menos:hover {
+            background-color: #c0392b;
+        }
+
+        .ajuste-section .btn-menos:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .ajuste-section .btn-mais {
+            padding: 10px;
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .ajuste-section .btn-mais:hover {
+            background-color: #16a085;
+        }
+
+        .ajuste-section .btn-mais:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .ajuste-section .btn-adicionar {
+            padding: 10px;
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .ajuste-section .btn-adicionar:hover {
+            background-color: #e67e22;
+        }
+
+        .ajuste-section .btn-adicionar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #ajustesPendentes {
+            margin-top: 15px;
+        }
+
+        .pendentes-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #numeroAjusteInput {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn-calculadora {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-calculadora:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-calculadora::before {
+            content: "🖩";
+            margin-right: 5px;
+        }
+
+        .calculadora-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            width: 250px;
+        }
+
+        .calculadora-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calculadora-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .btn-fechar-calculadora {
+            background-color: transparent;
+            border: none;
+            color: red;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-fechar-calculadora:hover {
+            color: darkred;
+        }
+
+        .calculadora-display {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            text-align: right;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .calculadora-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .calculadora-buttons button {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .calculadora-buttons button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .calculadora-buttons .btn-op {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .calculadora-buttons .btn-op:hover {
+            background-color: #2980b9;
+        }
+
+        .calculadora-buttons .btn-clear {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .calculadora-buttons .btn-clear:hover {
+            background-color: #c0392b;
+        }
+
+        .calculadora-buttons .btn-equal {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .calculadora-buttons .btn-equal:hover {
+            background-color: #27ae60;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Ajuste - PDA</h1>
+        <div class="header-buttons">
+            <button class="btn-criar-ajustes" onclick="criarAjustes()">Criar Ajustes</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="ajuste-section">
+            <h2><button class="btn-calculadora" onclick="abrirCalculadora()">Calculadora</button></h2>
+            <div class="input-section">
+                <input type="number" id="codigoInput" placeholder="Código ou Barras do Produto">
+                <button onclick="buscarProduto()">Buscar</button>
+            </div>
+            <div id="produtoInfo"></div>
+            <div class="ajuste-massa-section" id="ajusteMassaSection">
+                <label id="ajusteMassivoLabel">
+                    <input type="checkbox" id="ajusteMassivoCheckbox" onchange="atualizarAjusteMassivo()">
+                    Ajuste em Massa
+                </label>
+                <label id="ajusteMenosLabel">
+                    <input type="checkbox" id="ajusteMenosCheckbox" onchange="atualizarAjusteMassa(); formatarQuantidade()">
+                    Ajuste Menos
+                </label>
+                <label id="ajusteMaisLabel">
+                    <input type="checkbox" id="ajusteMaisCheckbox" onchange="atualizarAjusteMassa(); formatarQuantidade()">
+                    Ajuste Mais
+                </label>
+                <label>
+                    <input type="checkbox" id="ocultarTecladoCheckbox" onchange="atualizarOcultarTeclado()">
+                    Ocultar Teclado
+                </label>
+                <label>
+                    <input type="checkbox" id="ajusteAutomaticoCheckbox" onchange="atualizarAjusteAutomatico()">
+                    Ajuste Automático
+                </label>
+            </div>
+            <div id="ajusteForm">
+                <div class="quantidade-section">
+                    <button class="btn-menos" onclick="alterarQuantidade('menos')" disabled>-</button>
+                    <input type="number" id="ajusteInput" placeholder="Quantidade a ajustar">
+                    <button class="btn-mais" onclick="alterarQuantidade('mais')" disabled>+</button>
+                </div>
+                <div class="confirmar-section" id="botoesAjuste">
+                    <button class="btn-adicionar" onclick="adicionarAjuste()" disabled>Adicionar Ajuste</button>
+                </div>
+            </div>
+            <div id="ajustesPendentes">
+                <div class="pendentes-header">
+                    <h2 id="tituloAjustesPendentes">Último Ajuste: <span id="ultimoNumeroAjuste">Carregando...</span></h2>
+                    <div style="display: flex; flex-direction: column; gap: 10px;" id="botoesPendentes">
+                        <input type="tel" id="numeroAjusteInput" placeholder="Número do Ajuste">
+                        <button onclick="alterarAjustes()" style="background-color: purple;">Alterar Ajuste</button>
+                        <button onclick="cancelarAjuste()" style="background-color: red;">Cancelar Ajuste</button>
+                    </div>
+                </div>
+                <table id="pendentesTable">
+                    <thead>
+                        <tr>
+                            <th>Nº Ajuste</th>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Qtd</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendentesBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="calculadora-container" id="calculadoraContainer">
+        <div class="calculadora-header">
+            <h3>Calculadora</h3>
+            <button class="btn-fechar-calculadora" onclick="fecharCalculadora()">X</button>
+        </div>
+        <input type="text" class="calculadora-display" id="calculadoraDisplay" readonly value="0">
+        <div class="calculadora-buttons">
+            <button class="btn-clear" onclick="limparCalculadora()">C</button>
+            <button onclick="adicionarDigito('7')">7</button>
+            <button onclick="adicionarDigito('8')">8</button>
+            <button onclick="adicionarDigito('9')">9</button>
+            <button class="btn-op" onclick="definirOperacao('/')">/</button>
+            <button onclick="adicionarDigito('4')">4</button>
+            <button onclick="adicionarDigito('5')">5</button>
+            <button onclick="adicionarDigito('6')">6</button>
+            <button class="btn-op" onclick="definirOperacao('*')">*</button>
+            <button onclick="adicionarDigito('1')">1</button>
+            <button onclick="adicionarDigito('2')">2</button>
+            <button onclick="adicionarDigito('3')">3</button>
+            <button class="btn-op" onclick="definirOperacao('-')">-</button>
+            <button onclick="adicionarDigito('0')">0</button>
+            <button onclick="adicionarDigito('.')">.</button>
+            <button class="btn-equal" onclick="calcularResultado()">=</button>
+            <button class="btn-op" onclick="definirOperacao('+')">+</button>
+        </div>
+    </div>
+
+    <script>
+        console.log('Carregando pda_index.js...');
+
+        let currentProduto = null;
+        let currentNumeroAjuste = null;
+        let ajusteAtivo = false;
+        let produtosMassivo = [];
+        let ultimoCodigoBipado = null;
+        let ajustesPendentes = [];
+        let produtoSelecionado = null;
+        let lastKeyTime = 0;
+        let keyBuffer = '';
+        const BIP_THRESHOLD = 50;
+        const MIN_BIP_LENGTH = 8;
+        let processandoAjuste = false;
+        const ajustesEmProcesso = new Set();
+
+        let calculadoraValor = '0';
+        let operacaoPendente = null;
+        let valorAnterior = null;
+
+        // Função de debounce
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        async function buscarUltimoAjusteUsuario() {
+            try {
+                const response = await fetch('/ultimo-ajuste-usuario', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao buscar o último ajuste do usuário');
+                }
+
+                const data = await response.json();
+                const ultimoNumeroAjusteSpan = document.getElementById('ultimoNumeroAjuste');
+
+                if (data && data.ultimo_ajuste) {
+                    ultimoNumeroAjusteSpan.textContent = data.ultimo_ajuste;
+                } else {
+                    ultimoNumeroAjusteSpan.textContent = 'Nenhum ajuste encontrado';
+                }
+            } catch (err) {
+                console.error('Erro ao buscar último ajuste:', err);
+                const ultimoNumeroAjusteSpan = document.getElementById('ultimoNumeroAjuste');
+                ultimoNumeroAjusteSpan.textContent = 'Erro ao carregar';
+                exibirMensagem(`Erro ao buscar último ajuste: ${err.message}`, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+    console.log('Página carregada.');
+    const codigoInput = document.getElementById('codigoInput');
+    const numeroAjusteInput = document.getElementById('numeroAjusteInput');
+
+    if (codigoInput) {
+        codigoInput.focus();
+        atualizarOcultarTeclado(); // Configura o estado inicial do teclado
+        codigoInput.addEventListener('input', debounce((e) => {
+            const codigo = e.target.value.trim();
+            console.log('Evento input detectado no codigoInput. Código no campo:', codigo);
+            if (codigo && (codigo.endsWith('\n') || codigo.length >= 8)) {
+                console.log('Código de barras detectado via input no codigoInput:', codigo);
+                e.target.value = codigo.replace(/\n/g, '');
+                const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+                const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+                if (ajusteAutomaticoCheckbox.checked) {
+                    ajustarEstoqueAutomaticamente(codigo);
+                } else if (ajusteMassivoCheckbox.checked) {
+                    processarCodigoBarras(codigo);
+                } else {
+                    buscarProduto();
+                }
+            }
+        }, 200));
+
+        // codigoInput.addEventListener('keypress', (e) => {
+        //     if (e.key === 'Enter') {
+        //         e.preventDefault();
+        //         buscarProduto(false);
+        //     }
+        // });
+
+        codigoInput.addEventListener('focus', () => {
+            console.log('Campo de busca ativo e focado.');
+        });
+    }
+
+    if (numeroAjusteInput) {
+        numeroAjusteInput.setAttribute('type', 'text');
+        numeroAjusteInput.setAttribute('autocapitalize', 'off');
+        numeroAjusteInput.setAttribute('autocomplete', 'off');
+        numeroAjusteInput.onfocus = function() {
+            this.removeAttribute('inputmode');
+            console.log('Foco no numeroAjusteInput, teclado virtual permitido.');
+        };
+    }
+
+    buscarUltimoAjusteUsuario();
+    carregarAjustesPendentes();
+});
+
+        function abrirCalculadora() {
+            const calculadoraContainer = document.getElementById('calculadoraContainer');
+            calculadoraContainer.style.display = 'block';
+            limparCalculadora();
+        }
+
+        function fecharCalculadora() {
+            const calculadoraContainer = document.getElementById('calculadoraContainer');
+            calculadoraContainer.style.display = 'none';
+        }
+
+        function limparCalculadora() {
+            calculadoraValor = '0';
+            operacaoPendente = null;
+            valorAnterior = null;
+            atualizarDisplayCalculadora();
+        }
+
+        function atualizarDisplayCalculadora() {
+            const display = document.getElementById('calculadoraDisplay');
+            display.value = calculadoraValor;
+        }
+
+        function adicionarDigito(digito) {
+            if (calculadoraValor === '0' && digito !== '.') {
+                calculadoraValor = digito;
+            } else if (digito === '.' && calculadoraValor.includes('.')) {
+                return;
+            } else {
+                calculadoraValor += digito;
+            }
+            atualizarDisplayCalculadora();
+        }
+
+        function definirOperacao(op) {
+            if (operacaoPendente !== null) {
+                calcularResultado();
+            }
+            valorAnterior = parseFloat(calculadoraValor);
+            operacaoPendente = op;
+            calculadoraValor = '0';
+            atualizarDisplayCalculadora();
+        }
+
+        function calcularResultado() {
+            if (operacaoPendente === null || valorAnterior === null) return;
+
+            const valorAtual = parseFloat(calculadoraValor);
+            let resultado;
+
+            switch (operacaoPendente) {
+                case '+':
+                    resultado = valorAnterior + valorAtual;
+                    break;
+                case '-':
+                    resultado = valorAnterior - valorAtual;
+                    break;
+                case '*':
+                    resultado = valorAnterior * valorAtual;
+                    break;
+                case '/':
+                    if (valorAtual === 0) {
+                        calculadoraValor = 'Erro';
+                        atualizarDisplayCalculadora();
+                        return;
+                    }
+                    resultado = valorAnterior / valorAtual;
+                    break;
+                default:
+                    return;
+            }
+
+            calculadoraValor = resultado.toString();
+            operacaoPendente = null;
+            valorAnterior = null;
+            atualizarDisplayCalculadora();
+        }
+
+        function exibirMensagem(mensagem, tipo = 'success') {
+            const produtoInfo = document.getElementById('produtoInfo');
+            if (produtoInfo) {
+                const cor = tipo === 'success' ? 'green' : 'red';
+                produtoInfo.innerHTML = `<p style="color: ${cor};">${mensagem}</p>`;
+                setTimeout(() => {
+                    if (produtoInfo.innerHTML === `<p style="color: ${cor};">${mensagem}</p>`) {
+                        produtoInfo.innerHTML = '';
+                    }
+                }, 3000);
+            } else {
+                console.error('Elemento produtoInfo não encontrado para exibir mensagem.');
+            }
+        }
+
+        function atualizarAjusteMassivo() {
+            const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+            if (ajusteMassivoCheckbox.checked) {
+                console.log('Ajuste em Massivo ativado.');
+                produtosMassivo = [];
+                ultimoCodigoBipado = null;
+                document.getElementById('ajusteInput').value = '0';
+            } else {
+                console.log('Ajuste em Massivo desativado.');
+                produtosMassivo = [];
+                ultimoCodigoBipado = null;
+                document.getElementById('ajusteInput').value = '0';
+            }
+        }
+
+        function atualizarAjusteMassa() {
+            const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+            const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+            const btnMenos = document.querySelector('.btn-menos');
+            const btnMais = document.querySelector('.btn-mais');
+
+            console.log(`Atualizar Ajuste Massa - Ajuste Menos: ${ajusteMenosCheckbox.checked}, Ajuste Mais: ${ajusteMaisCheckbox.checked}`);
+
+            if (ajusteMenosCheckbox.checked && ajusteMaisCheckbox.checked) {
+                ajusteMaisCheckbox.checked = false;
+            }
+
+            if (ajusteMenosCheckbox.checked) {
+                btnMenos.disabled = !ajusteAtivo;
+                btnMais.disabled = true;
+            } else if (ajusteMaisCheckbox.checked) {
+                btnMenos.disabled = true;
+                btnMais.disabled = !ajusteAtivo;
+            } else {
+                btnMenos.disabled = !ajusteAtivo;
+                btnMais.disabled = !ajusteAtivo;
+            }
+        }
+
+        // function atualizarOcultarTeclado() {
+        //     const ocultarTecladoCheckbox = document.getElementById('ocultarTecladoCheckbox');
+        //     const codigoInput = document.getElementById('codigoInput');
+
+        //     if (ocultarTecladoCheckbox.checked) {
+        //         console.log('Ocultar Teclado ativado.');
+        //         codigoInput.setAttribute('inputmode', 'none');
+        //         codigoInput.setAttribute('autocapitalize', 'off');
+        //         codigoInput.setAttribute('autocomplete', 'off');
+
+        //         codigoInput.onfocus = function() {
+        //             this.setAttribute('inputmode', 'none');
+        //             console.log('Foco detectado no campo codigoInput. Teclado virtual bloqueado.');
+        //         };
+
+        //         codigoInput.onkeydown = function(event) {
+        //             if (event.key === 'Enter') {
+        //                 console.log('Tecla Enter detectada, permitindo busca manual.');
+        //                 return true;
+        //             }
+        //             console.log('Evento keydown detectado, mas teclado virtual permanece bloqueado.');
+        //             return true;
+        //         };
+
+        //         codigoInput.onkeypress = function(event) {
+        //             console.log('Evento keypress detectado, bloqueando para evitar teclado virtual.');
+        //             event.preventDefault();
+        //             return false;
+        //         };
+        //     } else {
+        //         console.log('Ocultar Teclado desativado, permitindo teclado virtual.');
+        //         codigoInput.removeAttribute('inputmode');
+        //         codigoInput.setAttribute('autocapitalize', 'off');
+        //         codigoInput.setAttribute('autocomplete', 'off');
+
+        //         codigoInput.onfocus = null;
+        //         codigoInput.onkeydown = null;
+        //         codigoInput.onkeypress = null;
+        //     }
+
+        //     manterFoco();
+        // }
+// function atualizarOcultarTeclado() {
+//     const ocultarTecladoCheckbox = document.getElementById('ocultarTecladoCheckbox');
+//     const codigoInput = document.getElementById('codigoInput');
+//     const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+
+//     if (!codigoInput) {
+//         console.error('Elemento codigoInput não encontrado.');
+//         return;
+//     }
+
+//     if (ocultarTecladoCheckbox.checked) {
+//         console.log('Ocultar Teclado ativado.');
+//         codigoInput.setAttribute('type', 'text');
+//         codigoInput.setAttribute('inputmode', 'none');
+//         codigoInput.setAttribute('autocapitalize', 'off');
+//         codigoInput.setAttribute('autocomplete', 'off');
+
+//         codigoInput.onfocus = function() {
+//             console.log('Foco detectado no campo codigoInput. Mantendo foco para scanner.');
+//             this.setAttribute('inputmode', 'none');
+//         };
+
+//         codigoInput.onkeydown = function(event) {
+//             if (event.key === 'Enter') {
+//                 console.log('Tecla Enter detectada, permitindo busca manual.');
+//                 buscarProduto(false);
+//                 return true;
+//             }
+//             console.log('Evento keydown bloqueado:', event.key);
+//             event.preventDefault();
+//             return false;
+//         };
+
+//         codigoInput.onkeypress = function(event) {
+//             console.log('Evento keypress bloqueado:', event.key);
+//             event.preventDefault();
+//             return false;
+//         };
+
+//         codigoInput.onpaste = function(event) {
+//             console.log('Evento paste bloqueado.');
+//             event.preventDefault();
+//             return false;
+//         };
+
+//         codigoInput.oninput = function(event) {
+//             console.log('Evento input disparado via scanner:', event.data);
+//         };
+//     } else {
+//         console.log('Ocultar Teclado desativado, permitindo teclado virtual.');
+//         codigoInput.setAttribute('type', 'number');
+//         codigoInput.removeAttribute('inputmode');
+//         codigoInput.setAttribute('autocapitalize', 'off');
+//         codigoInput.setAttribute('autocomplete', 'off');
+
+//         codigoInput.onfocus = null;
+//         codigoInput.onkeydown = null;
+//         codigoInput.onkeypress = null;
+//         codigoInput.onpaste = null;
+//         codigoInput.oninput = null;
+//     }
+
+//     // Restaurar foco imediatamente
+//     setTimeout(() => {
+//         codigoInput.focus();
+//         console.log('Foco restaurado em codigoInput após atualizarOcultarTeclado.');
+//     }, 0);
+// }
+
+function atualizarOcultarTeclado() {
+    const ocultarTecladoCheckbox = document.getElementById('ocultarTecladoCheckbox');
+    const codigoInput = document.getElementById('codigoInput');
+    const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+
+    if (!codigoInput) {
+        console.error('Elemento codigoInput não encontrado.');
+        return;
+    }
+
+    if (ocultarTecladoCheckbox.checked) {
+        console.log('Ocultar Teclado ativado.');
+        codigoInput.setAttribute('type', 'text');
+        codigoInput.setAttribute('inputmode', 'none');
+        codigoInput.setAttribute('autocapitalize', 'off');
+        codigoInput.setAttribute('autocomplete', 'off');
+
+        codigoInput.onfocus = function() {
+            console.log('Foco detectado no campo codigoInput. Mantendo foco para scanner.');
+            this.setAttribute('inputmode', 'none');
+        };
+
+        codigoInput.onkeydown = function(event) {
+            console.log('Evento keydown detectado:', event.key);
+            event.preventDefault(); // Bloqueia todas as teclas, incluindo Enter
+            return false;
+        };
+
+        codigoInput.onkeypress = function(event) {
+            console.log('Evento keypress bloqueado:', event.key);
+            event.preventDefault();
+            return false;
+        };
+
+        codigoInput.onpaste = function(event) {
+            console.log('Evento paste bloqueado.');
+            event.preventDefault();
+            return false;
+        };
+
+        codigoInput.oninput = function(event) {
+            console.log('Evento input disparado via scanner:', event.data);
+            const cleanedValue = this.value.trim().replace(/\n/g, '');
+            this.value = cleanedValue; // Remove \n do campo
+        };
+    } else {
+        console.log('Ocultar Teclado desativado, permitindo teclado virtual.');
+        codigoInput.setAttribute('type', 'number');
+        codigoInput.removeAttribute('inputmode');
+        codigoInput.setAttribute('autocapitalize', 'off');
+        codigoInput.setAttribute('autocomplete', 'off');
+
+        codigoInput.onfocus = null;
+        codigoInput.onkeydown = null;
+        codigoInput.onkeypress = null;
+        codigoInput.onpaste = null;
+        codigoInput.oninput = null;
+    }
+
+    setTimeout(() => {
+        codigoInput.focus();
+        console.log('Foco restaurado em codigoInput após atualizarOcultarTeclado.');
+    }, 0);
+}
+        
+
+        function manterFoco() {
+    const codigoInput = document.getElementById('codigoInput');
+    const ocultarTecladoCheckbox = document.getElementById('ocultarTecladoCheckbox');
+
+    if (codigoInput) {
+        if (ocultarTecladoCheckbox.checked) {
+            codigoInput.setAttribute('inputmode', 'none');
+            codigoInput.blur(); // Evita que o foco acione o teclado
+            setTimeout(() => {
+                codigoInput.focus(); // Restaura o foco após um pequeno delay para permitir entrada via scanner
+                console.log('Foco mantido no campo codigoInput (teclado oculto).');
+            }, 100);
+        } else {
+            codigoInput.removeAttribute('inputmode');
+            codigoInput.focus();
+            console.log('Foco mantido no campo codigoInput (teclado permitido).');
+        }
+    } else {
+        console.error('Elemento codigoInput não encontrado no DOM.');
+    }
+}
+
+        function toggleTeclado() {
+    const codigoInput = document.getElementById('codigoInput');
+    const ocultarTeclado = document.getElementById('ocultarTecladoCheckbox').checked;
+
+    if (ocultarTeclado) {
+        codigoInput.setAttribute('inputmode', 'none');
+        console.log('Teclado virtual oculto.');
+    } else {
+        codigoInput.removeAttribute('inputmode');
+        console.log('Teclado virtual permitido.');
+    }
+}
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const numeroAjusteInput = document.getElementById('numeroAjusteInput');
+            if (numeroAjusteInput) {
+                numeroAjusteInput.removeAttribute('inputmode');
+                numeroAjusteInput.setAttribute('type', 'text');
+                numeroAjusteInput.onfocus = function () {
+                    this.removeAttribute('inputmode');
+                    console.log('Foco no numeroAjusteInput, teclado virtual permitido.');
+                };
+            }
+        });
+
+        async function buscarProduto(autoAdicionar = false) {
+            const codigoInput = document.getElementById('codigoInput');
+            const produtoInfo = document.getElementById('produtoInfo');
+            const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+            const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+
+            if (!codigoInput) {
+                console.error('Elemento codigoInput não encontrado.');
+                return;
+            }
+
+            const codigo = codigoInput.value.trim();
+
+            if (!codigo) {
+                if (produtoInfo) {
+                    exibirMensagem('Por favor, insira um código ou barras.', 'error');
+                }
+                manterFoco();
+                return;
+            }
+
+            try {
+                console.log('Iniciando busca para o código/barras:', codigo);
+                const response = await fetch(`/produto/${encodeURIComponent(codigo)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Erro na resposta:', errorText);
+                    if (produtoInfo) {
+                        exibirMensagem(`Erro ao buscar o produto: ${errorText}`, 'error');
+                    }
+                    produtoSelecionado = null;
+                    currentProduto = null;
+                    manterFoco();
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('Dados recebidos do backend:', data);
+
+                if (data && 'codigo' in data) {
+                    produtoSelecionado = data;
+                    currentProduto = {
+                        codigo: data.codigo || 'N/A',
+                        descricao: data.descricao || 'N/A',
+                        saldo: data.saldo != null ? String(data.saldo) : 'N/A',
+                        barras: data.barras || 'N/A',
+                        localizacao1: data.localizacao1 || 'N/A',
+                        localizacao2: data.localizacao2 || 'N/A',
+                        grupo: data.grupo || 'N/A',
+                        nome_fantasia: data.nome_fantasia || 'N/A',
+                        nu_fornecedor: data.nu_fornecedor || 'N/A'
+                    };
+
+                    const htmlContent = `
+                        <p><strong>Código:</strong> ${currentProduto.codigo}</p>
+                        <p><strong>Descrição:</strong> ${currentProduto.descricao}</p>
+                        <p><strong>Saldo:</strong> ${currentProduto.saldo}</p>
+                        <p><strong>Barras:</strong> ${currentProduto.barras}</p>
+                        <p><strong>Local 1:</strong> ${currentProduto.localizacao1} <strong>local 2:</strong> ${currentProduto.localizacao2}</p>
+                        <p><strong>Grupo:</strong> ${currentProduto.grupo}</p>
+                        <p><strong>Fornecedor:</strong> ${currentProduto.nome_fantasia} (Cód.: ${currentProduto.nu_fornecedor})</p>
+                    `;
+                    console.log('Conteúdo HTML para produtoInfo:', htmlContent);
+
+                    if (produtoInfo) {
+                        produtoInfo.innerHTML = htmlContent;
+                    } else {
+                        console.error('Elemento produtoInfo não encontrado.');
+                    }
+
+                    if (autoAdicionar || (document.getElementById('ajusteAutomaticoCheckbox') && document.getElementById('ajusteAutomaticoCheckbox').checked)) {
+                        await adicionarAjuste();
+                    }
+                } else {
+                    if (produtoInfo) {
+                        exibirMensagem('Produto não encontrado.', 'error');
+                    }
+                    produtoSelecionado = null;
+                    currentProduto = null;
+                }
+            } catch (error) {
+                console.error('Erro ao buscar produto:', error);
+                if (produtoInfo) {
+                    exibirMensagem(`Erro ao buscar o produto: ${error.message}`, 'error');
+                }
+                produtoSelecionado = null;
+                currentProduto = null;
+            }
+
+            codigoInput.value = '';
+            manterFoco();
+        }
+
+        async function adicionarAjuste() {
+            const produtoInfo = document.getElementById('produtoInfo');
+            
+            if (!currentNumeroAjuste || !currentProduto || isNaN(parseInt(document.getElementById('ajusteInput').value))) {
+                return;
+            }
+
+            const quantidade = parseInt(document.getElementById('ajusteInput').value);
+            
+            try {
+                const response = await fetch('/adicionar-ajuste-pendente', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        numero_ajuste: currentNumeroAjuste,
+                        codigo: currentProduto.codigo,
+                        descricao: currentProduto.descricao,
+                        quantidade: quantidade,
+                        localizacao1: currentProduto.localizacao1,
+                        localizacao2: currentProduto.localizacao2,
+                        grupo: currentProduto.grupo,
+                        nome_fantasia: currentProduto.nome_fantasia,
+                        nu_fornecedor: currentProduto.nu_fornecedor
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    const ajusteExistente = ajustesPendentes.find(a => 
+                        a.codigo === currentProduto.codigo && a.numero_ajuste === currentNumeroAjuste);
+                    
+                    if (ajusteExistente) {
+                        ajusteExistente.quantidade += quantidade;
+                    } else {
+                        ajustesPendentes.push({
+                            numero_ajuste: currentNumeroAjuste,
+                            codigo: currentProduto.codigo,
+                            descricao: currentProduto.descricao,
+                            quantidade: quantidade,
+                            localizacao1: currentProduto.localizacao1,
+                            localizacao2: currentProduto.localizacao2,
+                            grupo: currentProduto.grupo,
+                            nome_fantasia: currentProduto.nome_fantasia,
+                            nu_fornecedor: currentProduto.nu_fornecedor
+                        });
+                    }
+
+                    exibirMensagemSucesso(`Ajuste criado com sucesso! Quantidade: ${quantidade}`);
+                    document.getElementById('ajusteInput').value = '0';
+                    document.getElementById('codigoInput').value = '';
+                    atualizarListaPendentes();
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar ajuste:', error);
+            }
+        }
+
+        function exibirMensagemSucesso(mensagem) {
+            const produtoInfo = document.getElementById('produtoInfo');
+            if (!produtoInfo) return;
+
+            const mensagensAntigas = produtoInfo.querySelectorAll('.mensagem-sucesso');
+            mensagensAntigas.forEach(msg => msg.remove());
+
+            const mensagemDiv = document.createElement('div');
+            mensagemDiv.className = 'mensagem-sucesso';
+            mensagemDiv.textContent = mensagem;
+            
+            mensagemDiv.style.cssText = `
+                color: green;
+                font-weight: bold;
+                margin: 5px 0;
+                padding: 3px;
+                background-color: #f0fff0;
+                border-left: 3px solid green;
+            `;
+
+            produtoInfo.insertBefore(mensagemDiv, produtoInfo.firstChild);
+
+            setTimeout(() => {
+                if (mensagemDiv.parentNode) {
+                    mensagemDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function toggleTeclado() {
+            const codigoInput = document.getElementById('codigoInput');
+            const ocultarTeclado = document.getElementById('ocultarTecladoCheckbox').checked;
+
+            if (ocultarTeclado) {
+                codigoInput.setAttribute('inputmode', 'none');
+                console.log('Teclado virtual oculto.');
+            } else {
+                codigoInput.setAttribute('inputmode', 'none');
+                console.log('Teclado virtual permanece oculto (padrão).');
+            }
+        }
+
+        function atualizarExibicaoQuantidade() {
+            const ajusteInput = document.getElementById('ajusteInput');
+            const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+            const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+            
+            if (!ajusteInput || !ajusteMenosCheckbox || !ajusteMaisCheckbox) {
+                console.error('Elementos ajusteInput, ajusteMenosCheckbox ou ajusteMaisCheckbox não encontrados.');
+                return;
+            }
+
+            let quantidade = parseInt(ajusteInput.value.trim()) || 0;
+
+            if (ajusteMenosCheckbox.checked) {
+                ajusteInput.value = quantidade === 0 ? '0' : -Math.abs(quantidade);
+                ajusteInput.style.color = quantidade !== 0 ? 'red' : 'black';
+            } else if (ajusteMaisCheckbox.checked) {
+                ajusteInput.value = Math.abs(quantidade);
+                ajusteInput.style.color = quantidade !== 0 ? 'green' : 'black';
+            } else {
+                ajusteInput.value = quantidade;
+                ajusteInput.style.color = 'black';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+            const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+            const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+            const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+            const ajusteInput = document.getElementById('ajusteInput');
+
+            if (ajusteMassivoCheckbox) ajusteMassivoCheckbox.addEventListener('change', () => garantirApenasUmTipoAjuste(ajusteMassivoCheckbox));
+            if (ajusteMenosCheckbox) {
+                ajusteMenosCheckbox.addEventListener('change', () => {
+                    garantirApenasUmTipoAjuste(ajusteMenosCheckbox);
+                });
+            }
+            if (ajusteMaisCheckbox) {
+                ajusteMaisCheckbox.addEventListener('change', () => {
+                    garantirApenasUmTipoAjuste(ajusteMaisCheckbox);
+                });
+            }
+            if (ajusteAutomaticoCheckbox) ajusteAutomaticoCheckbox.addEventListener('change', () => garantirApenasUmTipoAjuste(ajusteAutomaticoCheckbox));
+            if (ajusteInput) ajusteInput.addEventListener('input', atualizarExibicaoQuantidade);
+        });
+
+        function garantirApenasUmTipoAjuste(checkbox) {
+            const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+            const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+            const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+            const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+
+            if (checkbox === ajusteMassivoCheckbox && ajusteMassivoCheckbox.checked) {
+                ajusteAutomaticoCheckbox.checked = false;
+            } else if (checkbox === ajusteAutomaticoCheckbox && ajusteAutomaticoCheckbox.checked) {
+                ajusteMassivoCheckbox.checked = false;
+            }
+            atualizarAjusteMassa();
+            atualizarAjusteAutomatico();
+        }
+
+        async function processarCodigoBarras(codigo) {
+            if (!codigo) {
+                console.log('Nenhum código fornecido para processar.');
+                exibirMensagem('Nenhum código fornecido para processar.', 'error');
+                return;
+            }
+
+            if (!ajusteAtivo) {
+                console.log('Ajustes não estão ativos. Clique em "Criar Ajustes" primeiro.');
+                exibirMensagem('Por favor, clique em "Criar Ajustes" ou "Alterar Ajustes" para começar a adicionar ajustes.', 'error');
+                return;
+            }
+
+            try {
+                console.log(`Processando código de barras: ${codigo}`);
+                const response = await fetch(`/produto/${codigo}`);
+                const produto = await response.json();
+                if (produto.error) {
+                    throw new Error(produto.error);
+                }
+
+                currentProduto = produto;
+
+                const ajusteMassivoCheckbox = document.getElementById('ajusteMassivoCheckbox');
+                if (ajusteMassivoCheckbox.checked) {
+                    const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+                    const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+
+                    console.log('Ajuste em Massivo ativo. Ajuste Menos:', ajusteMenosCheckbox.checked, 'Ajuste Mais:', ajusteMaisCheckbox.checked);
+
+                    let produtoExistente = produtosMassivo.find(p => p.codigo === produto.codigo);
+
+                    if (!produtoExistente || ultimoCodigoBipado !== codigo) {
+                        produtoExistente = { codigo: produto.codigo, quantidade: 0 };
+                        if (!produtosMassivo.find(p => p.codigo === produto.codigo)) {
+                            produtosMassivo.push(produtoExistente);
+                        }
+                    }
+
+                    produtoExistente.quantidade += 1;
+
+                    const quantidadeTotal = produtoExistente.quantidade;
+                    document.getElementById('ajusteInput').value = ajusteMenosCheckbox.checked ? -quantidadeTotal : quantidadeTotal;
+
+                    console.log('Produtos acumulados:', produtosMassivo);
+                    console.log('Quantidade atualizada no campo:', document.getElementById('ajusteInput').value);
+
+                    ultimoCodigoBipado = codigo;
+
+                    document.getElementById('produtoInfo').innerHTML = `
+                        <p>Código: ${produto.codigo}</p>
+                        <p>Descrição: ${produto.descricao || 'Descrição não disponível'}</p>
+                        <p>Saldo Atual: ${produto.saldo !== undefined ? produto.saldo : 'N/A'}</p>
+                        <p>Barras: ${produto.barras || 'N/A'}</p>
+                    `;
+                }
+
+                document.getElementById('codigoInput').value = '';
+            } catch (err) {
+                console.error('Erro ao processar código de barras:', err);
+                exibirMensagem('Erro ao processar código de barras: ' + err.message, 'error');
+                document.getElementById('codigoInput').value = '';
+            } finally {
+                atualizarOcultarTeclado();
+            }
+        }
+
+        async function atualizarAjusteAutomatico() {
+    const ajusteAutomaticoCheckbox = document.getElementById('ajusteAutomaticoCheckbox');
+    const ajusteMassivoLabel = document.getElementById('ajusteMassivoLabel');
+    const ajusteMenosLabel = document.getElementById('ajusteMenosLabel');
+    const ajusteMaisLabel = document.getElementById('ajusteMaisLabel');
+    const botoesAjuste = document.getElementById('botoesAjuste');
+    const botoesPendentes = document.getElementById('botoesPendentes');
+    const pendentesTable = document.getElementById('pendentesTable');
+    const ajusteMassaSection = document.getElementById('ajusteMassaSection');
+    const ajusteForm = document.getElementById('ajusteForm');
+    const codigoInput = document.getElementById('codigoInput');
+
+    console.log('Função atualizarAjusteAutomatico chamada. Ajuste Automático marcado:', ajusteAutomaticoCheckbox.checked);
+
+    if (ajusteMassaSection) {
+        ajusteMassaSection.style.display = 'flex';
+        console.log('AjusteMassaSection tornada visível temporariamente.');
+    } else {
+        console.error('AjusteMassaSection não encontrada no DOM.');
+    }
+
+    if (ajusteAutomaticoCheckbox.checked) {
+        console.log('Ajuste Automático ativado. Ocultando elementos...');
+        if (ajusteMassivoLabel) ajusteMassivoLabel.style.display = 'none';
+        if (ajusteMenosLabel) ajusteMenosLabel.style.display = 'none';
+        if (ajusteMaisLabel) ajusteMaisLabel.style.display = 'none';
+        if (botoesAjuste) botoesAjuste.style.display = 'none';
+        if (botoesPendentes) botoesPendentes.style.display = 'none';
+        if (pendentesTable) pendentesTable.style.display = 'table';
+        if (ajusteForm) ajusteForm.style.display = 'none';
+    } else {
+        console.log('Ajuste Automático desativado. Exibindo elementos...');
+        if (ajusteMassivoLabel) ajusteMassivoLabel.style.display = 'flex';
+        if (ajusteMenosLabel) ajusteMenosLabel.style.display = 'flex';
+        if (ajusteMaisLabel) ajusteMaisLabel.style.display = 'flex';
+        if (botoesAjuste) botoesAjuste.style.display = 'block';
+        if (botoesPendentes) botoesPendentes.style.display = 'flex';
+        if (pendentesTable) pendentesTable.style.display = 'table';
+        if (ajusteForm) ajusteForm.style.display = 'block';
+    }
+
+    // Restaurar foco no codigoInput
+    if (codigoInput) {
+        setTimeout(() => {
+            codigoInput.focus();
+            console.log('Foco restaurado em codigoInput após atualizarAjusteAutomatico.');
+        }, 0);
+    }
+}
+
+        async function cancelarAjuste() {
+            if (!currentNumeroAjuste) {
+                exibirMensagem('Nenhum ajuste selecionado para cancelar.', 'error');
+                return;
+            }
+
+            const confirmacao = confirm(`Tem certeza que deseja cancelar o ajuste ${currentNumeroAjuste}?`);
+            if (!confirmacao) {
+                return;
+            }
+
+            let codigoInput = document.getElementById('codigoInput');
+            if (!codigoInput) {
+                console.error('Elemento codigoInput não encontrado no DOM.');
+                exibirMensagem('Erro: Campo de código não encontrado. Por favor, recarregue a página.', 'error');
+                return;
+            }
+
+            try {
+                console.log('Desabilitando campo codigoInput antes da requisição...');
+                codigoInput.disabled = true;
+
+                const response = await fetch(`/cancelar-ajuste/${currentNumeroAjuste}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao cancelar ajuste');
+                }
+
+                const result = await response.json();
+                exibirMensagem(result.message || 'Ajuste cancelado com sucesso!');
+
+                ajustesPendentes = [];
+                atualizarListaPendentes();
+                document.getElementById('produtoInfo').innerHTML = '';
+                currentProduto = null;
+                produtosMassivo = [];
+                ultimoCodigoBipado = null;
+                document.getElementById('ajusteInput').value = '0';
+                document.getElementById('numeroAjusteInput').value = '';
+                currentNumeroAjuste = null;
+                ajusteAtivo = false;
+                document.getElementById('ajusteMassaSection').style.display = 'none';
+                document.getElementById('ajusteForm').style.display = 'none';
+                document.querySelector('.btn-adicionar').disabled = true;
+                document.querySelector('.btn-menos').disabled = true;
+                document.querySelector('.btn-mais').disabled = true;
+                await carregarAjustesPendentes();
+            } catch (err) {
+                console.error('Erro ao cancelar ajuste:', err);
+                exibirMensagem(`Erro ao cancelar ajuste: ${err.message}`, 'error');
+            } finally {
+                codigoInput = document.getElementById('codigoInput');
+                if (codigoInput) {
+                    console.log('Reabilitando campo codigoInput...');
+                    codigoInput.disabled = false;
+                    atualizarOcultarTeclado();
+                } else {
+                    console.warn('Elemento codigoInput não encontrado no DOM ao tentar reabilitá-lo.');
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+async function ajustarEstoqueAutomaticamente(codigo) {
+    if (processandoAjuste) {
+        console.log('Ajuste automático em andamento, ignorando nova chamada.');
+        return;
+    }
+
+    const chaveAjuste = `${currentNumeroAjuste}-${codigo}`;
+    if (ajustesEmProcesso.has(chaveAjuste)) {
+        console.log(`Ajuste já processado para o código ${codigo} no ajuste ${currentNumeroAjuste}, ignorando.`);
+        return;
+    }
+
+    ajustesEmProcesso.add(chaveAjuste);
+    processandoAjuste = true;
+
+    const codigoInput = document.getElementById('codigoInput');
+    if (!codigoInput) {
+        console.error('Elemento codigoInput não encontrado.');
+        processandoAjuste = false;
+        ajustesEmProcesso.delete(chaveAjuste);
+        return;
+    }
+
+    try {
+        console.log(`[${Date.now()}] Iniciando ajustarEstoqueAutomaticamente para código: ${codigo}`);
+        const numeroAjusteInput = document.getElementById('numeroAjusteInput');
+        const numeroAjuste = numeroAjusteInput.value.trim();
+        const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+        const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+        const quantidadeInput = document.getElementById('ajusteInput');
+        let quantidade = parseInt(quantidadeInput.value) || 0;
+
+        if (!numeroAjuste) {
+            console.log('Número do ajuste não fornecido.');
+            exibirMensagem('Por favor, informe o número do ajuste.', 'error');
+            return;
+        }
+
+        if (!codigo) {
+            console.log('Código do produto não fornecido.');
+            exibirMensagem('Por favor, informe o código do produto.', 'error');
+            return;
+        }
+
+        if (ajusteMenosCheckbox.checked && ajusteMaisCheckbox.checked) {
+            console.log('Ambos "Ajuste Menos" e "Ajuste Mais" estão marcados.');
+            exibirMensagem('Por favor, selecione apenas uma opção: Ajuste Menos ou Ajuste Mais.', 'error');
+            return;
+        }
+
+        const ajusteMenosAtivado = ajusteMenosCheckbox.checked && !ajusteMaisCheckbox.checked;
+
+        if (quantidade === 0) {
+            quantidade = ajusteMenosAtivado ? -1 : 1;
+            quantidadeInput.value = quantidade;
+        }
+
+        console.log(`Ajustando estoque automaticamente - Número do Ajuste: ${numeroAjuste}, Código: ${codigo}, Quantidade: ${quantidade}, Ajuste Menos: ${ajusteMenosAtivado}`);
+
+        const produtoResponse = await fetch(`/produto/${codigo}`);
+        if (!produtoResponse.ok) {
+            const errorData = await produtoResponse.json();
+            throw new Error(errorData.error || 'Produto não encontrado');
+        }
+        const produto = await produtoResponse.json();
+        console.log('Produto encontrado:', produto);
+
+        const ajusteResponse = await fetch('/ajustar-estoque-automatico', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                numero_ajuste: numeroAjuste,
+                codigo_produto: codigo,
+                quantidade: quantidade,
+                ajuste_menos: ajusteMenosAtivado
+            })
+        });
+
+        if (!ajusteResponse.ok) {
+            const errorData = await ajusteResponse.json();
+            console.error('Erro ao ajustar estoque automaticamente:', errorData);
+
+            if (errorData.error === 'Ajuste pendente não encontrado para o número e código do produto fornecidos') {
+                const novoAjuste = {
+                    numero_ajuste: parseInt(numeroAjuste),
+                    codigo: produto.codigo,
+                    descricao: produto.descricao || 'Descrição não disponível',
+                    quantidade: quantidade
+                };
+
+                const adicionarResponse = await fetch('/adicionar-ajuste-pendente', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(novoAjuste)
+                });
+
+                if (!adicionarResponse.ok) {
+                    const adicionarError = await adicionarResponse.json();
+                    throw new Error(adicionarError.error || 'Erro ao adicionar novo ajuste pendente');
+                }
+
+                console.log('Novo ajuste pendente adicionado com sucesso:', novoAjuste);
+
+                const ajusteExistenteIndex = ajustesPendentes.findIndex(a => a.codigo === produto.codigo && a.numero_ajuste === parseInt(numeroAjuste));
+                if (ajusteExistenteIndex !== -1) {
+                    ajustesPendentes[ajusteExistenteIndex].quantidade += quantidade;
+                } else {
+                    ajustesPendentes.push(novoAjuste);
+                }
+                console.log('Estado do ajustesPendentes após adicionar novo ajuste:', ajustesPendentes);
+            } else {
+                throw new Error(errorData.error || 'Erro ao ajustar estoque');
+            }
+        } else {
+            const result = await ajusteResponse.json();
+            console.log('Resultado do ajuste automático:', result);
+            exibirMensagem(result.message || `Ajuste pendente atualizado! Quantidade: ${result.quantidade}`);
+
+            const ajusteExistenteIndex = ajustesPendentes.findIndex(a => a.codigo === produto.codigo && a.numero_ajuste === parseInt(numeroAjuste));
+            if (ajusteExistenteIndex !== -1) {
+                ajustesPendentes[ajusteExistenteIndex].quantidade = result.quantidade;
+            } else {
+                ajustesPendentes.push({
+                    numero_ajuste: parseInt(numeroAjuste),
+                    codigo: produto.codigo,
+                    descricao: produto.descricao || 'Descrição não disponível',
+                    quantidade: result.quantidade
+                });
+            }
+            console.log('Estado do ajustesPendentes após atualização:', ajustesPendentes);
+        }
+
+        atualizarListaPendentes();
+        const pendentesTable = document.getElementById('pendentesTable');
+        if (pendentesTable) {
+            pendentesTable.classList.remove('hidden');
+        }
+
+        // Limpar o campo e restaurar o foco
+        codigoInput.value = '';
+        setTimeout(() => {
+            codigoInput.focus();
+            console.log('Foco restaurado no codigoInput após ajuste automático.');
+        }, 0);
+    } catch (err) {
+        console.error('Erro ao ajustar estoque automaticamente:', err);
+        exibirMensagem(`Erro ao ajustar estoque: ${err.message}`, 'error');
+    } finally {
+        processandoAjuste = false;
+        ajustesEmProcesso.delete(chaveAjuste);
+        codigoInput.value = '';
+        setTimeout(() => {
+            codigoInput.focus();
+            console.log('Foco restaurado no codigoInput no bloco finally.');
+        }, 0);
+    }
+}
+
+function atualizarListaPendentes() {
+    const pendentesTableBody = document.querySelector('#pendentesTable tbody');
+    if (!pendentesTableBody) {
+        console.error('Tabela pendentesTable não encontrada.');
+        return;
+    }
+
+    // Limpa a tabela antes de redesenhar
+    pendentesTableBody.innerHTML = '';
+
+    // Verifica se há ajustes pendentes
+    if (ajustesPendentes.length === 0) {
+        const row = pendentesTableBody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 4;
+        cell.textContent = 'Nenhum ajuste pendente.';
+        return;
+    }
+
+    // Cria um mapa para consolidar as quantidades
+    const ajustesConsolidados = {};
+    ajustesPendentes.forEach(ajuste => {
+        const chave = `${ajuste.numero_ajuste}-${ajuste.codigo}`;
+        if (!ajustesConsolidados[chave]) {
+            ajustesConsolidados[chave] = { ...ajuste, quantidade: 0 };
+        }
+        ajustesConsolidados[chave].quantidade += ajuste.quantidade;
+    });
+
+    // Renderiza apenas as entradas consolidadas
+    Object.values(ajustesConsolidados).forEach(ajuste => {
+        const row = pendentesTableBody.insertRow();
+        row.insertCell().textContent = ajuste.numero_ajuste;
+        row.insertCell().textContent = ajuste.codigo;
+        row.insertCell().textContent = ajuste.descricao;
+        row.insertCell().textContent = ajuste.quantidade;
+    });
+
+    console.log('Tabela pendentesTable atualizada com sucesso.');
+}
+
+
+        async function carregarAjustesPendentes() {
+            try {
+                const response = await fetch('/ajustes-pendentes', {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Erro na requisição /ajustes-pendentes:', response.status, errorText);
+                    throw new Error(errorText || 'Erro ao carregar ajustes pendentes');
+                }
+
+                const novosAjustes = await response.json();
+                console.log('Ajustes pendentes carregados:', novosAjustes);
+
+                if (novosAjustes && novosAjustes.length > 0) {
+                    ajustesPendentes = novosAjustes.filter(ajuste => ajuste.status && ajuste.status.trim().toUpperCase() === 'PENDENTE');
+                    console.log('Ajustes pendentes filtrados (após filtro no frontend):', ajustesPendentes);
+                }
+
+                atualizarListaPendentes();
+            } catch (err) {
+                console.error('Erro ao carregar ajustes pendentes:', err);
+                exibirMensagem(`Erro ao carregar ajustes pendentes: ${err.message}`, 'error');
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        async function alterarAjustes() {
+            const numeroDigitado = document.getElementById('numeroAjusteInput').value.trim();
+            
+            if (!numeroDigitado) {
+                exibirMensagem('Por favor, digite um número de ajuste.', 'error');
+                return;
+            }
+
+            const numeroAjuste = parseInt(numeroDigitado);
+            if (isNaN(numeroAjuste)) {
+                exibirMensagem('O número do ajuste deve ser um valor numérico válido.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/ajustes-pendentes/${numeroAjuste}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Erro ao buscar ajuste');
+                }
+                const ajustes = await response.json();
+
+                if (ajustes.length === 0) {
+                    const statusResponse = await fetch(`/ajuste-status/${numeroAjuste}`, {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!statusResponse.ok) {
+                        const errorData = await statusResponse.json();
+                        throw new Error(errorData.error || 'Erro ao verificar status do ajuste');
+                    }
+                    const statusData = await statusResponse.json();
+                    if (statusData.status) {
+                        exibirMensagem(`O ajuste #${numeroAjuste} não está pendente. Status atual: ${statusData.status}.`, 'error');
+                    } else {
+                        exibirMensagem(`O ajuste #${numeroAjuste} não existe.`, 'error');
+                    }
+                    document.getElementById('numeroAjusteInput').value = '';
+                    return;
+                }
+
+                ajustesPendentes = [];
+                ajustesPendentes.push(...ajustes);
+                currentNumeroAjuste = numeroAjuste;
+                ajusteAtivo = true;
+
+                document.getElementById('ajusteMassaSection').style.display = 'flex';
+                document.getElementById('ajusteForm').style.display = 'block';
+                document.querySelector('.btn-adicionar').disabled = false;
+                document.querySelector('.btn-menos').disabled = false;
+                document.querySelector('.btn-mais').disabled = false;
+                atualizarAjusteMassa();
+
+                atualizarListaPendentes();
+
+                atualizarOcultarTeclado();
+            } catch (err) {
+                console.error('Erro ao buscar ajuste:', err);
+                exibirMensagem(`Erro ao buscar ajuste: ${err.message}`, 'error');
+            }
+        }
+
+        function alterarQuantidade(operacao) {
+            if (!ajusteAtivo) {
+                exibirMensagem('Por favor, clique em "Criar Ajustes" ou "Alterar Ajustes" para habilitar os comandos de ajuste.', 'error');
+                return;
+            }
+
+            const ajusteMenosCheckbox = document.getElementById('ajusteMenosCheckbox');
+            const ajusteMaisCheckbox = document.getElementById('ajusteMaisCheckbox');
+            let quantidade = parseInt(document.getElementById('ajusteInput').value) || 0;
+
+            console.log(`Alterar quantidade - Operação: ${operacao}, Quantidade atual: ${quantidade}, Ajuste Menos: ${ajusteMenosCheckbox.checked}, Ajuste Mais: ${ajusteMaisCheckbox.checked}`);
+
+            if (ajusteMenosCheckbox.checked && operacao !== 'menos') {
+                exibirMensagem('Apenas ajustes de diminuição são permitidos com "Ajuste Menos" marcado.', 'error');
+                return;
+            }
+            if (ajusteMaisCheckbox.checked && operacao !== 'mais') {
+                exibirMensagem('Apenas ajustes de aumento são permitidos com "Ajuste Mais" marcado.', 'error');
+                return;
+            }
+
+            if (operacao === 'mais') {
+                quantidade += 1;
+            } else if (operacao === 'menos') {
+                quantidade -= 1;
+            }
+
+            document.getElementById('ajusteInput').value = quantidade;
+            console.log(`Quantidade atualizada para: ${quantidade}`);
+        }
+
+        async function criarAjustes() {
+            try {
+                ajustesPendentes = [];
+                atualizarListaPendentes();
+                document.getElementById('produtoInfo').innerHTML = '';
+                currentProduto = null;
+                produtosMassivo = [];
+                ultimoCodigoBipado = null;
+                document.getElementById('ajusteInput').value = '0';
+
+                console.log('Obtendo novo número de ajuste do backend...');
+                const response = await fetch('/proximo-numero-ajuste', {
+                    method: 'GET',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                console.log('Resposta do backend para /proximo-numero-ajuste:', response);
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        exibirMensagem('Sua sessão expirou. Você será redirecionado para a página de login.', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                        return;
+                    }
+                    const errorData = await response.json();
+                    console.error('Erro ao buscar número de ajuste:', errorData);
+                    exibirMensagem(`Erro ao obter número de ajuste: ${errorData.error || 'Erro desconhecido'}`, 'error');
+                    throw new Error(errorData.error || 'Erro ao obter número de ajuste');
+                }
+
+                const data = await response.json();
+                if (!data.success || !data.numero_ajuste) {
+                    console.error('Erro: Resposta do backend não contém numero_ajuste:', data);
+                    exibirMensagem('Erro: Não foi possível obter o número de ajuste do servidor.', 'error');
+                    throw new Error('Resposta do backend inválida');
+                }
+
+                currentNumeroAjuste = data.numero_ajuste;
+                console.log(`Novo número de ajuste gerado: ${currentNumeroAjuste}`);
+                exibirMensagem(`Número de ajuste gerado: ${currentNumeroAjuste}`);
+
+                ajusteAtivo = true;
+                document.getElementById('ajusteMassaSection').style.display = 'flex';
+                document.getElementById('ajusteForm').style.display = 'block';
+                document.querySelector('.btn-adicionar').disabled = false;
+                document.querySelector('.btn-menos').disabled = false;
+                document.querySelector('.btn-mais').disabled = false;
+                atualizarAjusteMassa();
+
+                document.getElementById('numeroAjusteInput').value = currentNumeroAjuste;
+                atualizarOcultarTeclado();
+            } catch (err) {
+                console.error('Erro ao criar ajustes:', err);
+                exibirMensagem(`Erro ao criar ajustes: ${err.message}`, 'error');
+            }
+        }
+
+        function atualizarListaPendentes() {
+            const tbody = document.getElementById('pendentesBody');
+            tbody.innerHTML = '';
+            ajustesPendentes.forEach(ajuste => {
+                const tr = document.createElement('tr');
+                const ajusteSymbol = ajuste.quantidade > 0 ? '+' : '';
+                const colorStyle = ajuste.quantidade < 0 ? 'color: red;' : ajuste.quantidade > 0 ? 'color: green;' : '';
+                tr.style.cssText = colorStyle;
+                tr.innerHTML = `
+                    <td>${ajuste.numero_ajuste}</td>
+                    <td>${ajuste.codigo}</td>
+                    <td>${ajuste.descricao}</td>
+                    <td>${ajusteSymbol}${ajuste.quantidade}</td>
+                `;
+                tbody.insertBefore(tr, tbody.firstChild);
+            });
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            if (ajustesPendentes.length > 0) {
+                const confirmacao = confirm('Você tem ajustes pendentes. Tem certeza que deseja sair?');
+                if (!confirmacao) {
+                    return;
+                }
+            }
+            window.location.href = '/logout';
+        }
+
+        function formatarQuantidade() {
+            atualizarExibicaoQuantidade();
+        }
+
+        console.log('pda_index.js carregado com sucesso.');
+    </script>
+    <script>
+        (function(){
+            function c(){
+                var b = a.contentDocument || a.contentWindow.document;
+                if(b){
+                    var d = b.createElement('script');
+                    d.innerHTML = "window.__CF$cv$params={r:'93a9fac0aa50bd43',t:'MTc0NjM4MjQ4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                    b.getElementsByTagName('head')[0].appendChild(d);
+                }
+            }
+            if(document.body){
+                var a = document.createElement('iframe');
+                a.height = 1;
+                a.width = 1;
+                a.style.position = 'absolute';
+                a.style.top = 0;
+                a.style.left = 0;
+                a.style.border = 'none';
+                a.style.visibility = 'hidden';
+                document.body.appendChild(a);
+                if('loading' !== document.readyState) c();
+                else if(window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+                else {
+                    var e = document.onreadystatechange || function(){};
+                    document.onreadystatechange = function(b){
+                        e(b);
+                        if('loading' !== document.readyState){
+                            document.onreadystatechange = e;
+                            c();
+                        }
+                    }
+                }
+            }
+        })();
+    </script>
+    <script>
+        (function(){
+            function c(){
+                var b = a.contentDocument || a.contentWindow.document;
+                if(b){
+                    var d = b.createElement('script');
+                    d.innerHTML = "window.__CF$cv$params={r:'93d9a289a8a9adc3',t:'MTc0Njg4MjE4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                    b.getElementsByTagName('head')[0].appendChild(d);
+                }
+            }
+            if(document.body){
+                var a = document.createElement('iframe');
+                a.height = 1;
+                a.width = 1;
+                a.style.position = 'absolute';
+                a.style.top = 0;
+                a.style.left = 0;
+                a.style.border = 'none';
+                a.style.visibility = 'hidden';
+                document.body.appendChild(a);
+                if('loading' !== document.readyState) c();
+                else if(window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+                else {
+                    var e = document.onreadystatechange || function(){};
+                    document.onreadystatechange = function(b){
+                        e(b);
+                        if('loading' !== document.readyState){
+                            document.onreadystatechange = e;
+                            c();
+                        }
+                    }
+                }
+            }
+        })();
+    </script>
+</body>
+</html> 

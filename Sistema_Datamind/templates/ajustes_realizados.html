@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustes Realizados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .ajustes-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr {
+            background-color: #e6f4e6;
+        }
+
+        tr:hover {
+            background-color: #d0e8d0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Ajustes Realizados</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="ajustes-section">
+            <h2>Ajustes Realizados</h2>
+            <table id="ajustesTable">
+                <thead>
+                    <tr>
+                        <th>Número do Ajuste</th>
+                        <th>Data/Hora</th>
+                        <th>Matrícula</th>
+                        <th>Nome do Usuário</th>
+                        <th>Usuário que Liberou</th>
+                    </tr>
+                </thead>
+                <tbody id="ajustesBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/ajustes_realizados.js"></script>
+    <script>
+        function voltar() {
+            window.location.href = '/liberar-ajustes';
+        }
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>

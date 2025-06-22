@@ -1,0 +1,192 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - DataMind</title>
+  
+
+  <!-- !-- Fonte -- -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter :wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- !-- Ícones -- -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css "/>
+
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #001c69, #759bc7);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .login-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px 30px;
+      text-align: center;
+      animation: fadeInUp 1s ease-in-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .login-container h2 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .login-container p {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #ccc;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0 12px;
+    }
+
+    .input-group i {
+      color: #aaa;
+      margin-right: 10px;
+    }
+
+    .input-group input,
+    .input-group select {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-group input::placeholder {
+      color: #ffffff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #00eaff, #00aaff);
+    }
+
+    .footer-text {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .input-group select {
+  flex: 1;
+  background: #6c8eb4;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  border-radius: 6px;
+  padding: 8px;
+}
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>&lt;Sistema DataMind&gt;</h2>
+    <p>Você está a um clique do futuro!</p>
+
+    <div class="login-form">
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="matriculaInput" placeholder="Matrícula" autocomplete="off">
+      </div>
+
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="senhaInput" placeholder="Senha" autocomplete="off">
+      </div>
+
+      <p style="margin-top: 10px; text-align: left;">Selecione a rota:</p>
+      <div class="input-group" style="justify-content: flex-start;">
+        <i class="fas fa-desktop"></i>
+        <select id="deviceType">
+  <option value="pda">PDA</option>
+  <option value="desktop">Desktop</option>
+</select>
+      </div>
+
+      <button onclick="login()">Entrar</button>
+    </div>
+
+    <div class="footer-text">© 2025 - Sistema de Análise </div>
+  </div>
+
+  <script>
+    function login() {
+      const matricula = document.getElementById('matriculaInput').value.trim();
+      const senha = document.getElementById('senhaInput').value.trim();
+      const dispositivo = document.getElementById('deviceType').value;
+
+      if (!matricula || !senha) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+
+      console.log("Login realizado com:");
+      console.log("Matrícula:", matricula);
+      console.log("Senha:", senha);
+      console.log("Dispositivo:", dispositivo);
+
+      alert("Acesso permitido!");
+      // window.location.href = '/dashboard'; // Descomente quando tiver página interna
+    }
+  </script>
+<script src="/static/login.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92d9d5865f1e53b1',t:'MTc0NDE5OTkyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'937fb7bf19a8bfa0',t:'MTc0NTkzOTMzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+</body>
+</html> 

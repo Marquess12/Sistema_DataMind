@@ -1,0 +1,600 @@
+<!-- <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        /* Estilo do botão de logout */
+        .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilo dos dropdowns */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #3498db; /* Cor base padrão */
+        }
+
+        .dropbtn:hover {
+            background-color: #2980b9;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #34495e;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #2980b9;
+        }
+
+        /* Estilos específicos para cada dropdown */
+        .estoque .dropbtn { background-color: #2ecc71; }
+        .estoque .dropbtn:hover { background-color: #27ae60; }
+        .relatorios .dropbtn { background-color: #1abc9c; }
+        .relatorios .dropbtn:hover { background-color: #16a085; }
+        .rh .dropbtn { background-color: #9b59b6; }
+        .rh .dropbtn:hover { background-color: #8e44ad; }
+
+        /* Estilo do container principal */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gestão de Estoque</h1>
+        <div class="header-buttons">
+            <div class="dropdown estoque">
+                <button class="dropbtn">Estoque</button>
+                <div class="dropdown-content">
+                    <a href="/index" onclick="abririndex()">Gestão de Estoque</a>
+                    <a href="/ajustes_realizados" onclick="abrirAjustesRealizados()">Ajustes Realizados</a>
+                    <a href="/liberar-ajustes" onclick="abrirLiberarAjustes()">Liberar Ajustes</a>
+                </div>
+            </div>
+            <div class="dropdown relatorios">
+                <button class="dropbtn">Relatórios</button>
+                <div class="dropdown-content">
+                    <a href="/relatorio" onclick="abrirRelatorio()">Relatório</a>
+                </div>
+            </div>
+            <div class="dropdown rh">
+                <button class="dropbtn">RH</button>
+                <div class="dropdown-content">
+                    <a href="/cv_analise" onclick="abrirCVAnalise()">CV-Análise</a>
+                    <a href="/cadastro_vagas" onclick="abrirCadastrarVagas()">Cadastrar Vagas</a>
+                    <a href="/selecionar_candidatos" onclick="abrirSelecionarCandidatos()">Selecionar Candidatos</a>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Bem-vindo ao Sistema de Gestão de Estoque</h2>
+        <p>Selecione uma opção no menu acima para começar.</p>
+    </div>
+
+    <script>
+        function abririndex() {
+            console.log("Botão Gestão de Estoque clicado.");
+            window.location.href = '/index';
+        }
+
+        function abrirRelatorio() {
+            console.log("Botão Relatório clicado.");
+            window.location.href = '/relatorio';
+        }
+
+        function abrirCVAnalise() {
+            console.log("Botão CV-Análise clicado.");
+            window.location.href = '/cv_analise';
+        }
+
+        function abrirAjustesRealizados() {
+            console.log("Botão Ajustes Realizados clicado.");
+            window.location.href = '/ajustes_realizados';
+        }
+
+        function abrirLiberarAjustes() {
+            console.log("Botão Liberar Ajustes clicado.");
+            window.location.href = '/liberar-ajustes';
+        }
+
+        function abrirCadastrarVagas() {
+            console.log("Botão Cadastrar Vagas clicado.");
+            window.location.href = '/cadastro_vagas';
+        }
+
+        function abrirSelecionarCandidatos() {
+            console.log("Botão Selecionar Candidatos clicado.");
+            window.location.href = '/selecionar_candidatos';
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9399d409e935b023',t:'MTc0NjIxMzEyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html> -->
+
+
+<!-- <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e2a44, #2c3e50);
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar li {
+            margin: 10px 0;
+            position: relative;
+            transform: translateX(-50px);
+            opacity: 0;
+            animation: slideIn 0.5s forwards;
+            animation-delay: calc(var(--delay) * 0.1s);
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar a:hover {
+            color: #00ffea;
+            transform: scale(1.05);
+        }
+
+        .sidebar a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: #00ffea;
+            bottom: 8px;
+            left: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar a:hover::after {
+            width: 50%;
+        }
+
+        .sidebar .logout a {
+            color: #ff5555;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .sidebar .logout a:hover {
+            color: #ff7777;
+        }
+
+        .sidebar .logout a::after {
+            background: #ff5555;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555;
+            }
+            100% {
+                text-shadow: 0 0 10px #ff5555, 0 0 20px #ff5555;
+            }
+        }
+
+        .main-content {
+            margin-left: 220px;
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        p {
+            font-size: 18px;
+            color: #b0b0b0;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        /* Icons using Unicode (can be replaced with actual icons) */
+        .sidebar a::before {
+            font-size: 20px;
+        }
+
+        .estoque::before { content: "\1F4E6"; }
+        .relatorios::before { content: "\1F4CA"; }
+        .rh::before { content: "\1F465"; }
+        .logout::before { content: "\1F6AA"; }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <ul>
+            <li style="--delay: 1"><a href="{{ url_for('pagina_principal_page') }}" class="estoque">Estoque</a></li>
+            <li style="--delay: 2"><a href="{{ url_for('relatorio_page') }}" class="relatorios">Relatórios</a></li>
+            <li style="--delay: 3"><a href="{{ url_for('cv_analise') }}" class="rh">RH</a></li>
+            <li style="--delay: 4" class="logout"><a href="{{ url_for('logout') }}" class="logout">Sair</a></li>
+        </ul>
+    </nav>
+    <div class="main-content">
+        <h1>Bem-vindo, {{ username | default(session['user']['nome'], true) }}!</h1>
+        <p>Use o menu ao lado para navegar pelo sistema. Aqui você pode gerenciar o estoque, visualizar relatórios ou acessar as funcionalidades de RH.</p>
+    </div>
+    <script>
+        // Optional: Add click feedback
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.target.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e2a44, #2c3e50);
+            color: #fff;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s ease; /* Smooth slide animation */
+            transform: translateX(-220px); /* Default: hidden */
+        }
+
+        .sidebar.visible {
+            transform: translateX(0); /* Slide in when visible */
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .sidebar li {
+            margin: 10px 0;
+            position: relative;
+            transform: translateX(-50px);
+            opacity: 0;
+            animation: slideIn 0.5s forwards;
+            animation-delay: calc(var(--delay) * 0.1s);
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar a:hover {
+            color: #00ffea;
+            transform: scale(1.05);
+        }
+
+        .sidebar a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: #00ffea;
+            bottom: 8px;
+            left: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar a:hover::after {
+            width: 50%;
+        }
+
+        .sidebar .logout a {
+            color: #ff5555;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .sidebar .logout a:hover {
+            color: #ff7777;
+        }
+
+        .sidebar .logout a::after {
+            background: #ff5555;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 5px #ff5555, 0 0 10px #ff5555;
+            }
+            100% {
+                text-shadow: 0 0 10px #ff5555, 0 0 20px #ff5555;
+            }
+        }
+
+        .main-content {
+            margin-left: 0; /* No margin by default since sidebar is hidden */
+            padding: 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.shifted {
+            margin-left: 220px; /* Expand margin when sidebar is visible */
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        p {
+            font-size: 18px;
+            color: #b0b0b0;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        /* Hover Trigger Area */
+        .trigger-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 10px; /* Narrow strip to trigger hover */
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            transition: background 0.3s ease;
+            z-index: 1001;
+        }
+
+        .trigger-area:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Icons using Unicode */
+        .sidebar a::before {
+            font-size: 20px;
+        }
+
+        .estoque::before { content: "\1F4E6"; }
+        .relatorios::before { content: "\1F4CA"; }
+        .rh::before { content: "\1F465"; }
+        .logout::before { content: "\1F6AA"; }
+    </style>
+</head>
+<body>
+    <div class="trigger-area" id="triggerArea"></div>
+    <nav class="sidebar" id="sidebar">
+        <ul>
+            <li style="--delay: 1"><a href="{{ url_for('pagina_principal_page') }}" class="estoque">Estoque</a></li>
+            <li style="--delay: 2"><a href="{{ url_for('relatorio_page') }}" class="relatorios">Relatórios</a></li>
+            <li style="--delay: 3"><a href="{{ url_for('cv_analise') }}" class="rh">RH</a></li>
+            <li style="--delay: 4" class="logout"><a href="{{ url_for('logout') }}" class="logout">Sair</a></li>
+        </ul>
+    </nav>
+    <div class="main-content" id="mainContent">
+        <h1>Bem-vindo, {{ username | default(session['user']['nome'], true) }}!</h1>
+        <p>Passe o mouse sobre a borda esquerda para abrir o menu. Aqui você pode gerenciar o estoque, visualizar relatórios ou acessar as funcionalidades de RH.</p>
+    </div>
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const triggerArea = document.getElementById('triggerArea');
+
+        // Show sidebar on hover over trigger area or sidebar
+        triggerArea.addEventListener('mouseenter', () => {
+            sidebar.classList.add('visible');
+            mainContent.classList.add('shifted');
+        });
+
+        // Hide sidebar when mouse leaves the sidebar
+        sidebar.addEventListener('mouseleave', () => {
+            sidebar.classList.remove('visible');
+            mainContent.classList.remove('shifted');
+        });
+
+        // Keep sidebar open while hovering over it
+        sidebar.addEventListener('mouseenter', () => {
+            sidebar.classList.add('visible');
+            mainContent.classList.add('shifted');
+        });
+
+        // Optional: Click feedback for sidebar links
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.target.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

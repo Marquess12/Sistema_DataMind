@@ -1,0 +1,692 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Rupturas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+        .header h2 {
+            margin: 0;
+            display: inline-block;
+            font-size: 24px;
+        }
+        .header .btn-home {
+            float: right;
+            padding: 8px 15px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .header .btn-home:hover {
+            background-color: #219653;
+        }
+        .header .btn-sair {
+            float: right;
+            padding: 8px 15px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .header .btn-sair:hover {
+            background-color: #c0392b;
+        }
+        .content {
+            margin-top: 60px;
+            padding-bottom: 200px;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 0 20px 20px 20px;
+        }
+        .form-container label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .form-container input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+            margin-right: 10px;
+        }
+        .form-container button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .form-container button:hover {
+            background-color: #2c3e50;
+        }
+        .error-message {
+            color: red;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border: 1px solid red;
+            border-radius: 4px;
+            margin: 10px 20px;
+        }
+        .info-message {
+            margin: 10px 20px;
+        }
+        .section-title {
+            margin: 10px 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 97%;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin: 0 20px;
+        }
+        thead {
+            position: sticky;
+            top: 50px;
+            background-color: #2c3e50;
+            color: white;
+            z-index: 1;
+            width: calc(102.8% - 40px);
+            display: table;
+            margin: 0 1px;
+        }
+        th, td {
+            padding: 8px 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        th {
+            text-align: left;
+            white-space: nowrap;
+        }
+        td {
+            word-break: break-word;
+        }
+        tr {
+            display: table;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .zero {
+            color: red;
+            font-weight: bold;
+        }
+        .cd-stock {
+            color: green;
+            font-weight: bold;
+        }
+        .non-zero {
+            font-weight: bold;
+            text-align: center;
+        }
+        th:nth-child(1), td:nth-child(1) { width: 5%;  text-align: center; }
+        th:nth-child(2), td:nth-child(2) { width: 5%; }
+        th:nth-child(3), td:nth-child(3) { width: 30%; }
+        th:nth-child(4), td:nth-child(4) { width: 5%; }
+        th:nth-child(5), td:nth-child(5) { width: 10%; text-align: center; }
+        th:nth-child(6), td:nth-child(6) { width: 10%; text-align: center;}
+        th:nth-child(7), td:nth-child(7) { width: 5%;  text-align: center; }
+        th:nth-child(8), td:nth-child(8) { width: 10%; text-align: center; }
+        th:nth-child(9), td:nth-child(9) { width: 10%; text-align: center; }
+        .ver-codigos-btn {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 20px;
+            display: inline-block;
+        }
+        .ver-codigos-btn:hover {
+            background-color: #2c3e50;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .popup-content {
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .count {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .close-btn, .copy-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .close-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .close-btn:hover {
+            background-color: #c0392b;
+        }
+        .copy-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+        .nav-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            background-color: #ff9900;
+            color: white;
+        }
+        .nav-btn:hover {
+            background-color: #cc5f06;
+        }
+        .nav-btn:disabled {
+            background-color: #33503a;
+            cursor: not-allowed;
+        }
+        .charts-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container.pizza {
+            width: 30%;
+            max-width: 250px;
+            height: 290px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container.bar {
+            width: 40%;
+        }
+        .chart-container.comparacao {
+            width: 30%;
+            max-width: 250px;
+            height: 290px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-values {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        .chart-values p {
+            margin: 2px 0;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        @media (max-width: 768px) {
+            .charts-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .chart-container.pizza, .chart-container.bar, .chart-container.comparacao {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+            .chart-values {
+                text-align: center;
+            }
+        }
+        .form-container {
+            margin-top: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Análise de Rupturas</h2>
+        <a href="/" class="btn-home">Home</a>
+        <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+    <div class="form-container">
+        <form method="POST" action="/alerta_lojas" id="filterForm">
+            <label for="loja">Loja:</label>
+            <input type="text" id="loja" name="loja" value="{{ loja if loja is not none else '' }}">
+            <label for="grupo">Grupo:</label>
+            <input type="text" id="grupo" name="grupo" value="{{ grupo if grupo is not none else '' }}">
+            <label for="fornecedor">Fornecedor:</label>
+            <input type="text" id="fornecedor" name="fornecedor" value="{{ fornecedor if fornecedor is not none else '' }}">
+            <button type="submit">Filtrar</button>
+            <button type="button" onclick="window.print()">Imprimir</button>
+            <button type="button" onclick="exportToExcel()">Abrir em Excel</button>
+        </form>
+    </div>
+    <div class="content">
+        <div class="charts-container">
+            {% if dados_pizza %}
+                <div class="chart-container pizza">
+                    <canvas id="pizzaChart"></canvas>
+                    <div class="chart-values">
+                        <p>Rupturas: {{ dados_pizza.rupturas }}</p>
+                        <p>Com Estoque: {{ dados_pizza.com_estoque }}</p>
+                    </div>
+                    <script>
+                        const ctxPizza = document.getElementById('pizzaChart').getContext('2d');
+                        new Chart(ctxPizza, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Rupturas (%)', 'Com Estoque (%)'],
+                                datasets: [{
+                                    data: [{{ dados_pizza.rupturas }}, {{ dados_pizza.com_estoque }}],
+                                    backgroundColor: ['#ff8a8a', '#08fc9f'],
+                                    borderColor: ['#FFFFFF', '#FFFFFF'],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            color: '#2c3e50'
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Percentual de Rupturas na Loja',
+                                        color: '#2c3e50'
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+            {% endif %}
+
+            <!-- Gráfico Doughnut (Comparação com Lógica Invertida) -->
+            {% if total_skus_cd_com_saldo_sem_loja is defined and total_skus_cd_com_saldo_sem_loja > 0 %}
+                <div class="chart-container comparacao">
+                    <canvas id="comparacaoChart"></canvas>
+                    <div class="chart-values">
+                        <p>SKUs com Ruptura: {{ total_skus_cd_com_saldo_sem_loja }}</p>
+                        <p>SKUs com saldo no CD: {{ total_skus_cd_com_saldo - total_skus_cd_com_saldo_sem_loja }}</p>
+                    </div>
+                    <script>
+                        const ctxComparacao = document.getElementById('comparacaoChart').getContext('2d');
+                        new Chart(ctxComparacao, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['SKUs com Ruptura ', 'SKUs com saldo no CD'],
+                                datasets: [{
+                                    data: [{{ total_skus_cd_com_saldo_sem_loja }}, {{ total_skus_cd_com_saldo - total_skus_cd_com_saldo_sem_loja }}],
+                                    backgroundColor: ['#ff8a8a', '#08fc9f'],
+                                    borderColor: ['#FFFFFF', '#FFFFFF'],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            color: '#2c3e50'
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Distribuição de SKUs (Grupo Filtrado)',
+                                        color: '#2c3e50'
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+            {% endif %}
+
+            {% if dados_ranking %}
+                <div class="chart-container bar">
+                    <canvas id="barChart"></canvas>
+                    <script>
+                        const ctxBar = document.getElementById('barChart').getContext('2d');
+                        new Chart(ctxBar, {
+                            type: 'bar',
+                            data: {
+                                labels: {{ fornecedores | tojson }},
+                                datasets: [{
+                                    label: 'Rupturas por Fornecedor',
+                                    data: {{ rupturas | tojson }},
+                                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#7BC225', '#FF5733', '#C70039'],
+                                    borderColor: ['#FFFFFF'],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Ranking de Rupturas por Fornecedor (Top 10)',
+                                        color: '#2c3e50'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Número de Rupturas',
+                                            color: '#2c3e50'
+                                        },
+                                        ticks: {
+                                            color: '#2c3e50'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Fornecedor',
+                                            color: '#2c3e50'
+                                        },
+                                        ticks: {
+                                            color: '#2c3e50'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if erro %}
+            <p class="error-message">{{ erro }}</p>
+        {% endif %}
+
+        {% if produtos %}
+            <h3 class="section-title">Produtos com estoque zerado ou negativo na loja e saldo no CD:</h3>
+            <button type="button" class="ver-codigos-btn" onclick="mostrarCodigos()">Ver Códigos</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Grupo</th>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Unid</th>
+                        <th>Marca</th>
+                        <th>Fornecedor</th>
+                        <th>Localização</th>
+                        <th>Estoque no CD</th>
+                        <th>Estoque na Loja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fornecedor, produtos_fornecedor in produtos | groupby('fornecedor') | sort %}
+                        {% for produto in produtos_fornecedor %}
+                            {% if produto.estoque_loja is defined and produto.estoque_cd is defined %}
+                                {% set estoque_loja = (produto.estoque_loja | string | default('0')) | int %}
+                                {% set estoque_cd = (produto.estoque_cd | string | default('0')) | int %}
+                                {% if estoque_loja <= 0 and estoque_cd > 0 %}
+                                    <tr>
+                                        <td>{{ produto.grupo }}</td>
+                                        <td class="codigo-produto">{{ produto.codigo }}</td>
+                                        <td>{{ produto.descricao }}</td>
+                                        <td>{{ produto.und }}</td>
+                                        <td>{{ produto.marca }}</td>
+                                        <td>{{ produto.fornecedor }}</td>
+                                        <td>{{ produto.localizacao }}</td>
+                                        <td class="cd-stock">{{ produto.estoque_cd }}</td>
+                                        <td class="{% if estoque_loja == 0 %}zero{% else %}non-zero{% endif %}">{{ produto.estoque_loja }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="info-message">Nenhum produto com estoque zerado ou negativo na loja e saldo no CD encontrado.</p>
+        {% endif %}
+
+        <div class="overlay" id="overlay"></div>
+        <div class="popup" id="popupCodigos">
+            <div class="count" id="skuCount"></div>
+            <div class="popup-content" id="listaCodigos"></div>
+            <button class="copy-btn" onclick="copiarCodigos()">Copiar Códigos</button>
+            <button class="nav-btn" id="prevBtn" onclick="mostrarGrupoAnterior()" disabled>Anterior</button>
+            <button class="nav-btn" id="nextBtn" onclick="mostrarProximoGrupo()">Próximo</button>
+            <button class="close-btn" onclick="fecharPopup()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        let gruposCodigos = [];
+        let grupoAtual = 0;
+        const codigosPorGrupo = 30;
+        let autoFilterInterval = null;
+        let hasValidSubmission = false;
+        let initialLoja = '';
+        let initialGrupo = '';
+        let initialFornecedor = '';
+
+        function dividirCodigosEmGrupos(codigos) {
+            const grupos = [];
+            for (let i = 0; i < codigos.length; i += codigosPorGrupo) {
+                grupos.push(codigos.slice(i, i + codigosPorGrupo));
+            }
+            return grupos;
+        }
+
+        function mostrarCodigos() {
+            const codigos = Array.from(document.querySelectorAll('.codigo-produto'))
+                .map(cell => cell.textContent.trim());
+            
+            if (codigos.length === 0) {
+                alert("Nenhum código encontrado.");
+                return;
+            }
+
+            gruposCodigos = dividirCodigosEmGrupos(codigos);
+            grupoAtual = 0;
+            mostrarGrupoAtual();
+        }
+
+        function mostrarGrupoAtual() {
+            const codigosTexto = gruposCodigos[grupoAtual].join(", ");
+            document.getElementById('listaCodigos').textContent = codigosTexto;
+            document.getElementById('skuCount').textContent = `Grupo ${grupoAtual + 1} de ${gruposCodigos.length} (${gruposCodigos[grupoAtual].length} SKUs)`;
+            document.getElementById('prevBtn').disabled = grupoAtual === 0;
+            document.getElementById('nextBtn').disabled = grupoAtual === gruposCodigos.length - 1;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popupCodigos').style.display = 'block';
+        }
+
+        function mostrarProximoGrupo() {
+            if (grupoAtual < gruposCodigos.length - 1) {
+                grupoAtual++;
+                mostrarGrupoAtual();
+            }
+        }
+
+        function mostrarGrupoAnterior() {
+            if (grupoAtual > 0) {
+                grupoAtual--;
+                mostrarGrupoAtual();
+            }
+        }
+
+        function fecharPopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popupCodigos').style.display = 'none';
+            gruposCodigos = [];
+            grupoAtual = 0;
+        }
+
+        function copiarCodigos() {
+            const codigosTexto = document.getElementById('listaCodigos').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = codigosTexto;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert("Códigos copiados para a área de transferência! (Use Ctrl+C se necessário)");
+            } catch (err) {
+                console.error("Erro ao copiar automaticamente: ", err);
+                alert("Falha na cópia automática. Por favor, use Ctrl+C após selecionar o texto.");
+            } finally {
+                document.body.removeChild(textarea);
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(codigosTexto).then(() => {
+                    alert("Códigos copiados com sucesso!");
+                }).catch(err => {
+                    console.error("Erro com navigator.clipboard: ", err);
+                });
+            }
+        }
+
+        function exportToExcel() {
+            const table = document.querySelector('table');
+            if (!table) {
+                alert("Nenhuma tabela encontrada para exportar.");
+                return;
+            }
+            let csv = [];
+            const rows = table.querySelectorAll('tr');
+            for (const row of rows) {
+                const cols = row.querySelectorAll('th, td');
+                const rowData = Array.from(cols).map(col => `"${col.textContent.replace(/"/g, '""')}"`).join(',');
+                csv.push(rowData);
+            }
+            const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv.join('\n'));
+            const link = document.createElement('a');
+            link.setAttribute('href', csvContent);
+            link.setAttribute('download', 'produtos_zerados.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('overlay').addEventListener('click', fecharPopup);
+
+        // Função para disparar o filtro automaticamente a cada 1 minuto
+        function autoFilter() {
+            console.log("Verificando autoFilter - initialLoja:", initialLoja, "initialGrupo:", initialGrupo, "initialFornecedor:", initialFornecedor, "hasValidSubmission:", hasValidSubmission);
+            if (hasValidSubmission && initialLoja !== '') {
+                console.log("Filtro automático disparado às", new Date().toLocaleTimeString());
+                document.getElementById('filterForm').submit();
+            } else {
+                console.log("Filtro automático não disparado: initialLoja está vazio às", new Date().toLocaleTimeString());
+            }
+        }
+
+        // Configura o intervalo para chamar autoFilter a cada 1 minuto após a primeira submissão
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            const loja = document.getElementById('loja').value.trim();
+            const grupo = document.getElementById('grupo').value.trim();
+            const fornecedor = document.getElementById('fornecedor').value.trim();
+
+            if (loja === '') {
+                alert("Por favor, preencha o campo Loja.");
+                event.preventDefault();
+                return;
+            }
+
+            console.log("Submissão manual às", new Date().toLocaleTimeString(), "com Loja:", loja, "Grupo:", grupo, "Fornecedor:", fornecedor);
+            if (!hasValidSubmission) {
+                hasValidSubmission = true;
+                initialLoja = loja;
+                initialGrupo = grupo;
+                initialFornecedor = fornecedor;
+                if (autoFilterInterval) {
+                    clearInterval(autoFilterInterval);
+                    console.log("Intervalo anterior limpo às", new Date().toLocaleTimeString());
+                }
+                autoFilter();
+                autoFilterInterval = setInterval(autoFilter, 60000);
+                console.log("Filtro automático iniciado. Próxima execução em 1 minuto às", new Date(new Date().getTime() + 60000).toLocaleTimeString());
+                console.log("Intervalo configurado com ID:", autoFilterInterval);
+            } else {
+                console.log("Submissão adicional detectada às", new Date().toLocaleTimeString());
+            }
+        });
+
+        window.onload = function() {
+            console.log("Página carregada às", new Date().toLocaleTimeString());
+        };
+    </script>
+</body>
+</html>

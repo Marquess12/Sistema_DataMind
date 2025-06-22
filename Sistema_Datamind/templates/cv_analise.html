@@ -1,0 +1,1010 @@
+<!-- 
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Currículos - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilo do container principal */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Estilo da seção de busca */
+        .busca-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .busca-section input[type="text"],
+        .busca-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .busca-section button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-buscar {
+            background-color: #3498db;
+        }
+
+        .btn-buscar:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-cadastrar-vagas {
+            background-color: #2ecc71;
+        }
+
+        .btn-cadastrar-vagas:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-analisar {
+            background-color: #1abc9c;
+            margin-top: 10px;
+        }
+
+        .btn-analisar:hover {
+            background-color: #16a085;
+        }
+
+        .btn-analisar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Estilo da tabela de candidatos */
+        .candidatos-section {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tr.cursor-pointer:hover {
+            cursor: pointer;
+        }
+
+        /* Estilo da seção de resultados */
+        .resultado-section {
+            margin-top: 20px;
+        }
+
+        .resultado-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .melhor-candidato {
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Análise de Currículos</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="busca-section">
+            <h2>Análise de Currículos</h2>
+            <div class="input-section">
+                <input type="text" id="nomeCandidato" placeholder="Nome do candidato">
+                <select id="vagaSelect">
+                    <option value="">Selecione uma vaga</option>
+                </select>
+                <button class="btn-buscar" onclick="buscarCandidatos()">Buscar</button>
+                <button class="btn-cadastrar-vagas" onclick="window.location.href='/cadastro_vagas'">Cadastrar Vagas</button>
+            </div>
+        </div>
+
+        <div class="candidatos-section" id="candidatosSection" style="display: none;">
+            <h3>Candidatos Encontrados</h3>
+            <button class="btn-analisar" id="analisarBtn" onclick="analisarCandidatos()" disabled>Analisar</button>
+            <h4 style="margin-top: 10px; margin-bottom: 10px;">Selecionar:</h4>
+            <table id="candidatosTable">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Nome</th>
+                        <th>Habilidades</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatosBody"></tbody>
+            </table>
+        </div>
+
+        <div class="resultado-section" id="resultadoSection" style="display: none;">
+            <h3>Resultados da Análise</h3>
+            <div id="melhorCandidato" class="melhor-candidato"></div>
+            <table id="resultadosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Habilidades</th>
+                        <th>Compatibilidade (%)</th>
+                        <th>Pontuação Final</th>
+                        <th>Observações</th>
+                    </tr>
+                </thead>
+                <tbody id="resultadosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let selectedCandidatos = [];
+
+        async function carregarVagas() {
+            console.log('Carregando vagas...');
+            try {
+                const response = await fetch('/vagas');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao carregar vagas: ${response.status} - ${errorText}`);
+                }
+                const vagas = await response.json();
+                console.log('Vagas retornadas:', vagas);
+
+                const vagaSelect = document.getElementById('vagaSelect');
+                vagaSelect.innerHTML = '<option value="">Selecione uma vaga</option>';
+                vagas.forEach(vaga => {
+                    const option = document.createElement('option');
+                    option.value = vaga.id;
+                    option.textContent = vaga.titulo;
+                    vagaSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Erro ao carregar vagas:', err);
+                alert(`Erro ao carregar vagas: ${err.message}`);
+            }
+        }
+
+        async function buscarCandidatos() {
+            const nome = document.getElementById('nomeCandidato').value.trim();
+            const vagaId = document.getElementById('vagaSelect').value;
+
+            if (!vagaId) {
+                alert('Por favor, selecione uma vaga.');
+                return;
+            }
+
+            console.log(`Buscando candidatos: Nome=${nome}, Vaga ID=${vagaId}`);
+
+            try {
+                const response = await fetch(`/buscar-candidatos?nome=${encodeURIComponent(nome)}&vaga_id=${encodeURIComponent(vagaId)}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao buscar candidatos: ${response.status} - ${errorText}`);
+                }
+
+                const candidatos = await response.json();
+                console.log('Candidatos retornados:', candidatos);
+
+                const candidatosBody = document.getElementById('candidatosBody');
+                candidatosBody.innerHTML = '';
+                selectedCandidatos = [];
+
+                if (candidatos.length === 0) {
+                    candidatosBody.innerHTML = '<tr><td colspan="3">Nenhum candidato encontrado.</td></tr>';
+                    document.getElementById('analisarBtn').disabled = true;
+                } else {
+                    candidatos.forEach(candidato => {
+                        console.log('Processando candidato:', candidato); // Log para verificar os dados
+                        if (!candidato.id) {
+                            console.error('Candidato sem ID:', candidato);
+                            return; // Pular candidatos sem ID
+                        }
+                        const tr = document.createElement('tr');
+                        tr.classList.add('cursor-pointer');
+                        tr.setAttribute('data-candidato-id', candidato.id);
+                        tr.innerHTML = `
+                            <td><input type="checkbox" value="${candidato.id}" onchange="atualizarSelecao(this, ${candidato.id})"></td>
+                            <td>${candidato.nome || 'N/A'}</td>
+                            <td>${candidato.habilidades || 'N/A'}</td>
+                        `;
+                        tr.onclick = (e) => {
+                            if (e.target.type === 'checkbox') return; // Evitar redirecionamento ao clicar no checkbox
+                            const candidatoId = tr.getAttribute('data-candidato-id');
+                            console.log(`Clicou na linha. Candidato ID: ${candidatoId}`);
+                            window.location.href = `/curriculo_detalhes/${candidatoId}`;
+                        };
+                        candidatosBody.appendChild(tr);
+                    });
+
+                    document.getElementById('candidatosSection').style.display = 'block';
+                    document.getElementById('resultadoSection').style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Erro ao buscar candidatos:', err);
+                alert(`Erro ao buscar candidatos: ${err.message}`);
+                document.getElementById('candidatosSection').style.display = 'none';
+            }
+        }
+
+        function atualizarSelecao(checkbox, candidatoId) {
+            if (checkbox.checked) {
+                selectedCandidatos.push(candidatoId);
+            } else {
+                selectedCandidatos = selectedCandidatos.filter(id => id !== candidatoId);
+            }
+            console.log('Candidatos selecionados:', selectedCandidatos);
+            document.getElementById('analisarBtn').disabled = selectedCandidatos.length === 0;
+        }
+
+        async function analisarCandidatos() {
+            const vagaId = document.getElementById('vagaSelect').value;
+
+            if (selectedCandidatos.length === 0) {
+                alert('Por favor, selecione pelo menos um candidato.');
+                return;
+            }
+
+            if (!vagaId) {
+                alert('Por favor, selecione uma vaga.');
+                return;
+            }
+
+            console.log('Analisando candidatos:', selectedCandidatos, 'para a vaga ID:', vagaId);
+
+            try {
+                const response = await fetch('/analisar-candidatos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidatos: selectedCandidatos, vaga_id: vagaId })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao analisar candidatos: ${response.status} - ${errorText}`);
+                }
+
+                const resultado = await response.json();
+                console.log('Resultado da análise:', resultado);
+
+                const resultadosBody = document.getElementById('resultadosBody');
+                resultadosBody.innerHTML = '';
+
+                resultado.resultados.forEach(res => {
+                    const tr = document.createElement('tr');
+                    const observacoesHtml = res.observacoes && res.observacoes.length > 0
+                        ? `<ul>${res.observacoes.map(obs => `<li>${obs}</li>`).join('')}</ul>`
+                        : 'Nenhuma observação disponível.';
+                    tr.innerHTML = `
+                        <td>${res.nome}</td>
+                        <td>${res.habilidades}</td>
+                        <td>${res.compatibilidade}%</td>
+                        <td>${res.pontuacao_final}</td>
+                        <td>${observacoesHtml}</td>
+                    `;
+                    resultadosBody.appendChild(tr);
+                });
+
+                const melhorCandidatoDiv = document.getElementById('melhorCandidato');
+                if (resultado.melhor_candidato) {
+                    const observacoesMelhor = resultado.melhor_candidato.observacoes && resultado.melhor_candidato.observacoes.length > 0
+                        ? `<ul>${resultado.melhor_candidato.observacoes.map(obs => `<li>${obs}</li>`).join('')}</ul>`
+                        : 'Nenhuma observação disponível.';
+                    melhorCandidatoDiv.innerHTML = `
+                        <p><strong>Melhor Candidato:</strong> ${resultado.melhor_candidato.nome}</p>
+                        <p><strong>Pontuação Final:</strong> ${resultado.melhor_candidato.pontuacao_final}</p>
+                        <p><strong>Compatibilidade:</strong> ${resultado.melhor_candidato.compatibilidade}%</p>
+                        <p><strong>Observações:</strong></p>
+                        ${observacoesMelhor}
+                    `;
+                } else {
+                    melhorCandidatoDiv.innerHTML = '<p>Nenhum candidato encontrado para análise.</p>';
+                }
+
+                document.getElementById('resultadoSection').style.display = 'block';
+            } catch (err) {
+                console.error('Erro ao analisar candidatos:', err);
+                alert(`Erro ao analisar candidatos: ${err.message}`);
+                document.getElementById('resultadoSection').style.display = 'none';
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            history.back();
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Página carregada. Carregando vagas...');
+            carregarVagas();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'931c7a5f38ac675d',t:'MTc0NDg5ODczNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html> -->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Currículos - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn, .btn-selecionar {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-selecionar {
+            background-color: #3498db;
+        }
+
+        .btn-selecionar:hover {
+            background-color: #2980b9;
+        }
+
+        /* Estilo do container principal */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Estilo da seção de busca */
+        .busca-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .busca-section input[type="text"],
+        .busca-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .busca-section button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-buscar {
+            background-color: #3498db;
+        }
+
+        .btn-buscar:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-cadastrar-vagas {
+            background-color: #2ecc71;
+        }
+
+        .btn-cadastrar-vagas:hover {
+            background-color: #27ae60;
+        }
+
+        /* Estilo dos botões da seção de candidatos */
+        .candidatos-section {
+            margin-top: 20px;
+        }
+
+        .candidatos-section .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-selecionar-todos, .btn-analisar, .btn-aprovar {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            color: white;
+        }
+
+        .btn-selecionar-todos {
+            background-color: #f39c12;
+        }
+
+        .btn-selecionar-todos:hover {
+            background-color: #e67e22;
+            transform: scale(1.05);
+        }
+
+        .btn-analisar {
+            background-color: #1abc9c;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-analisar:hover {
+            background-color: #16a085;
+            transform: scale(1.05);
+        }
+
+        .btn-analisar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-aprovar {
+            background-color: #2ecc71;
+        }
+
+        .btn-aprovar:hover {
+            background-color: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .btn-aprovar:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Estilo da tabela de candidatos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tr.cursor-pointer:hover {
+            cursor: pointer;
+        }
+
+        /* Estilo da seção de resultados */
+        .resultado-section {
+            margin-top: 20px;
+        }
+
+        .resultado-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .melhor-candidato {
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Análise de Currículos</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="btn-selecionar" onclick="window.location.href='/selecionar_candidatos'">Selecionar Candidatos</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="busca-section">
+            <h2>Análise de Currículos</h2>
+            <div class="input-section">
+                <input type="text" id="nomeCandidato" placeholder="Nome do candidato">
+                <select id="vagaSelect">
+                    <option value="">Selecione uma vaga</option>
+                </select>
+                <button class="btn-buscar" onclick="buscarCandidatos()">Buscar</button>
+                <button class="btn-cadastrar-vagas" onclick="window.location.href='/cadastro_vagas'">Cadastrar Vagas</button>
+            </div>
+        </div>
+
+        <div class="candidatos-section" id="candidatosSection" style="display: none;">
+            <h3>Candidatos Encontrados</h3>
+            <div class="button-group">
+                <button class="btn-selecionar-todos" id="selecionarTodos" onclick="selecionarTodos()">Selecionar Todos</button>
+                <button class="btn-analisar" id="analisarBtn" onclick="analisarCandidatos()" disabled>Analisar</button>
+                <button class="btn-aprovar" id="aprovarBtn" onclick="aprovarCandidatos()" disabled>Aprovar</button>
+            </div>
+            <h4 style="margin-top: 10px; margin-bottom: 10px;">Selecionar:</h4>
+            <table id="candidatosTable">
+                <thead>
+                    <tr>
+                        <th>Selecionar</th>
+                        <th>Nome</th>
+                        <th>Habilidades</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatosBody"></tbody>
+            </table>
+        </div>
+
+        <div class="resultado-section" id="resultadoSection" style="display: none;">
+            <h3>Resultados da Análise</h3>
+            <div id="melhorCandidato" class="melhor-candidato"></div>
+            <table id="resultadosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Habilidades</th>
+                        <th>Compatibilidade (%)</th>
+                        <th>Pontuação Final</th>
+                        <th>Observações</th>
+                    </tr>
+                </thead>
+                <tbody id="resultadosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let selectedCandidatos = [];
+        let todosSelecionados = false;
+
+        async function carregarVagas() {
+            console.log('Carregando vagas...');
+            try {
+                const response = await fetch('/vagas');
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao carregar vagas: ${response.status} - ${errorText}`);
+                }
+                const vagas = await response.json();
+                console.log('Vagas retornadas:', vagas);
+
+                const vagaSelect = document.getElementById('vagaSelect');
+                vagaSelect.innerHTML = '<option value="">Selecione uma vaga</option>';
+                vagas.forEach(vaga => {
+                    const option = document.createElement('option');
+                    option.value = vaga.id;
+                    option.textContent = vaga.titulo;
+                    vagaSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Erro ao carregar vagas:', err);
+                alert(`Erro ao carregar vagas: ${err.message}`);
+            }
+        }
+
+        async function buscarCandidatos() {
+            const nome = document.getElementById('nomeCandidato').value.trim();
+            const vagaId = document.getElementById('vagaSelect').value;
+
+            if (!vagaId) {
+                alert('Por favor, selecione uma vaga.');
+                return;
+            }
+
+            console.log(`Buscando candidatos: Nome=${nome}, Vaga ID=${vagaId}`);
+
+            try {
+                const response = await fetch(`/buscar-candidatos?nome=${encodeURIComponent(nome)}&vaga_id=${encodeURIComponent(vagaId)}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao buscar candidatos: ${response.status} - ${errorText}`);
+                }
+
+                const candidatos = await response.json();
+                console.log('Candidatos retornados:', candidatos);
+
+                const candidatosBody = document.getElementById('candidatosBody');
+                candidatosBody.innerHTML = '';
+                selectedCandidatos = [];
+                todosSelecionados = false;
+                document.getElementById('selecionarTodos').textContent = 'Selecionar Todos';
+
+                if (candidatos.length === 0) {
+                    candidatosBody.innerHTML = '<tr><td colspan="3">Nenhum candidato encontrado.</td></tr>';
+                    document.getElementById('analisarBtn').disabled = true;
+                    document.getElementById('aprovarBtn').disabled = true;
+                } else {
+                    candidatos.forEach(candidato => {
+                        console.log('Processando candidato:', candidato);
+                        if (!candidato.id) {
+                            console.error('Candidato sem ID:', candidato);
+                            return;
+                        }
+                        const tr = document.createElement('tr');
+                        tr.classList.add('cursor-pointer');
+                        tr.setAttribute('data-candidato-id', candidato.id);
+                        tr.innerHTML = `
+                            <td><input type="checkbox" value="${candidato.id}" onchange="atualizarSelecao(this, ${candidato.id})"></td>
+                            <td>${candidato.nome || 'N/A'}</td>
+                            <td>${candidato.conteudo || 'N/A'}</td>
+                        `;
+                        tr.onclick = (e) => {
+                            if (e.target.type === 'checkbox') return;
+                            const candidatoId = tr.getAttribute('data-candidato-id');
+                            console.log(`Clicou na linha. Candidato ID: ${candidatoId}`);
+                            window.location.href = `/curriculo_detalhes/${candidatoId}`;
+                        };
+                        candidatosBody.appendChild(tr);
+                    });
+
+                    document.getElementById('candidatosSection').style.display = 'block';
+                    document.getElementById('resultadoSection').style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Erro ao buscar candidatos:', err);
+                alert(`Erro ao buscar candidatos: ${err.message}`);
+                document.getElementById('candidatosSection').style.display = 'none';
+            }
+        }
+
+        function atualizarSelecao(checkbox, candidatoId) {
+            if (checkbox.checked) {
+                selectedCandidatos.push(candidatoId);
+            } else {
+                selectedCandidatos = selectedCandidatos.filter(id => id !== candidatoId);
+                todosSelecionados = false;
+                document.getElementById('selecionarTodos').textContent = 'Selecionar Todos';
+            }
+            console.log('Candidatos selecionados:', selectedCandidatos);
+            document.getElementById('analisarBtn').disabled = selectedCandidatos.length === 0;
+            document.getElementById('aprovarBtn').disabled = selectedCandidatos.length === 0;
+        }
+
+        function selecionarTodos() {
+            const checkboxes = document.querySelectorAll('#candidatosTable input[type="checkbox"]');
+            todosSelecionados = !todosSelecionados;
+            selectedCandidatos = [];
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = todosSelecionados;
+                const candidatoId = parseInt(checkbox.value);
+                if (todosSelecionados) {
+                    selectedCandidatos.push(candidatoId);
+                }
+            });
+
+            const selecionarTodosBtn = document.getElementById('selecionarTodos');
+            selecionarTodosBtn.textContent = todosSelecionados ? 'Desmarcar Todos' : 'Selecionar Todos';
+            document.getElementById('analisarBtn').disabled = selectedCandidatos.length === 0;
+            document.getElementById('aprovarBtn').disabled = selectedCandidatos.length === 0;
+            console.log('Candidatos selecionados:', selectedCandidatos);
+        }
+
+        async function analisarCandidatos() {
+            const vagaId = document.getElementById('vagaSelect').value;
+
+            if (selectedCandidatos.length === 0) {
+                alert('Por favor, selecione pelo menos um candidato.');
+                return;
+            }
+
+            if (!vagaId) {
+                alert('Por favor, selecione uma vaga.');
+                return;
+            }
+
+            console.log('Analisando candidatos:', selectedCandidatos, 'para a vaga ID:', vagaId);
+
+            try {
+                const response = await fetch('/analisar-candidatos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidatos: selectedCandidatos, vaga_id: vagaId })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao analisar candidatos: ${response.status} - ${errorText}`);
+                }
+
+                const resultado = await response.json();
+                console.log('Resultado da análise:', resultado);
+
+                const resultadosBody = document.getElementById('resultadosBody');
+                resultadosBody.innerHTML = '';
+
+                resultado.resultados.forEach(res => {
+                    const tr = document.createElement('tr');
+                    const observacoesHtml = res.observacoes && res.observacoes.length > 0
+                        ? `<ul>${res.observacoes.map(obs => `<li>${obs}</li>`).join('')}</ul>`
+                        : 'Nenhuma observação disponível.';
+                    tr.innerHTML = `
+                        <td>${res.nome}</td>
+                        <td>${res.habilidades}</td>
+                        <td>${res.compatibilidade}%</td>
+                        <td>${res.pontuacao_final}</td>
+                        <td>${observacoesHtml}</td>
+                    `;
+                    resultadosBody.appendChild(tr);
+                });
+
+                const melhorCandidatoDiv = document.getElementById('melhorCandidato');
+                if (resultado.melhor_candidato) {
+                    const observacoesMelhor = resultado.melhor_candidato.observacoes && resultado.melhor_candidato.observacoes.length > 0
+                        ? `<ul>${resultado.melhor_candidato.observacoes.map(obs => `<li>${obs}</li>`).join('')}</ul>`
+                        : 'Nenhuma observação disponível.';
+                    melhorCandidatoDiv.innerHTML = `
+                        <p><strong>Melhor Candidato:</strong> ${resultado.melhor_candidato.nome}</p>
+                        <p><strong>Pontuação Final:</strong> ${resultado.melhor_candidato.pontuacao_final}</p>
+                        <p><strong>Compatibilidade:</strong> ${resultado.melhor_candidato.compatibilidade}%</p>
+                        <p><strong>Observações:</strong></p>
+                        ${observacoesMelhor}
+                    `;
+                } else {
+                    melhorCandidatoDiv.innerHTML = '<p>Nenhum candidato encontrado para análise.</p>';
+                }
+
+                document.getElementById('resultadoSection').style.display = 'block';
+            } catch (err) {
+                console.error('Erro ao analisar candidatos:', err);
+                alert(`Erro ao analisar candidatos: ${err.message}`);
+                document.getElementById('resultadoSection').style.display = 'none';
+            }
+        }
+
+        async function aprovarCandidatos() {
+            if (selectedCandidatos.length === 0) {
+                alert('Por favor, selecione pelo menos um candidato.');
+                return;
+            }
+
+            console.log('Aprovando candidatos:', selectedCandidatos);
+
+            try {
+                const response = await fetch('/aprovar-candidatos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ candidatos: selectedCandidatos })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao aprovar candidatos: ${response.status} - ${errorText}`);
+                }
+
+                const resultado = await response.json();
+                console.log('Resultado da aprovação:', resultado);
+                alert('Candidatos aprovados com sucesso!');
+                buscarCandidatos(); // Recarrega a tabela para remover os candidatos aprovados
+            } catch (err) {
+                console.error('Erro ao aprovar candidatos:', err);
+                alert(`Erro ao aprovar candidatos: ${err.message}`);
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            history.back();
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Página carregada. Carregando vagas...');
+            carregarVagas();
+        });
+    </script>
+</body>
+</html>

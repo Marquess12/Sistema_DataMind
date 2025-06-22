@@ -1,0 +1,648 @@
+<!-- 
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Conferência</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .back-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #3498db;
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #2980b9;
+        }
+
+        .tab-button.active {
+            background-color: #2ecc71;
+        }
+
+        .search-container {
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-container form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .search-container button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #2ecc71;
+        }
+
+        .search-container button:hover {
+            background-color: #27ae60;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 1200px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .editable {
+            border: 1px solid #ccc;
+            padding: 5px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .row-green {
+            background-color: #90ee90;
+        }
+
+        .row-red {
+            background-color: #ff6347;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Relatório de Conferência</h1>
+        <div class="header-buttons">
+            <button class="back-btn" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a href="/separador" class="tab-button">Separador</a>
+        <a href="/conferencia" class="tab-button active">Conferente</a>
+       
+        <a href="/suporte_logistico" class="tab-button">Suporte Logístico</a>
+    </div>
+
+    <div class="search-container">
+        <form action="/conferencia/buscar" method="post">
+            <input type="number" name="numero_pedido" placeholder="Digite o Nº Pedido" required>
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nº Pedido</th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Qtd Ped</th>
+                    <th>Qtd Cont</th>
+                    <th>Divergência</th>
+                    <th>Crédito</th>
+                    <th>Status</th>
+                    <th>Conferente</th>
+                    <th>Separador</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if dados and dados|length > 0 %}
+                    {% for item in dados %}
+                        {% if item['id'] is not none and item['quantidade_pedida'] is not none %}
+                            <tr data-id="{{ item['id']|e }}">
+                                <td>{{ item['numero_pedido'] if item['numero_pedido'] is not none else '-' }}</td>
+                                <td>{{ item['codigo'] if item['codigo'] is not none else '-' }}</td>
+                                <td>{{ item['descricao'] if item['descricao'] is not none else '-' }}</td>
+                                <td class="qtd-ped">{{ item['quantidade_pedida']|int if item['quantidade_pedida'] is not none else '-' }}</td>
+                                <td>
+                                    <input type="number" class="editable" id="qtd_cont_{{ item['id']|e }}" value="{{ item['quantidade_conferida']|int if item['quantidade_conferida'] is not none else 0 }}" onchange="updateRowColor('{{ item['id']|e }}')">
+                                </td>
+                                <td class="divergencia" id="divergencia_{{ item['id']|e }}">{{ item['divergencia']|int if item['divergencia'] is not none and item['divergencia'] != 0 else '' }}</td>
+                                <td class="credito" id="credito_{{ item['id']|e }}">R$ {{ item['credito']|float|round(2) if item['credito'] is not none else '0.00' }}</td>
+                                <td>{{ item['status'] if item['status'] is not none else '-' }}</td>
+                                <td>{{ item['conferente'] if item['conferente'] is not none else '-' }}</td>
+                                <td>{{ item['separador'] if item['separador'] is not none else '-' }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10">Nenhum dado disponível.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        console.log("Dados recebidos no template:", {{ dados|tojson|safe }});
+
+        let qtd_cont = {};
+
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2)}`;
+        }
+
+        function updateRowColor(id) {
+            const qtdContInput = document.getElementById(`qtd_cont_${id}`);
+            const divergenciaCell = document.getElementById(`divergencia_${id}`);
+            const creditoCell = document.getElementById(`credito_${id}`);
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const qtdPedCell = row.querySelector('.qtd-ped');
+
+            if (qtdContInput && divergenciaCell && creditoCell && qtdPedCell) {
+                const qtdCont = parseInt(qtdContInput.value) || 0;
+                const qtdPed = parseInt(qtdPedCell.textContent) || 0;
+                qtd_cont[id] = qtdCont;
+
+                // Calcula a divergência
+                const divergencia = qtdCont - qtdPed;
+                divergenciaCell.textContent = divergencia !== 0 ? (divergencia > 0 ? `+${divergencia}` : divergencia) : '';
+
+                // Calcula o crédito
+                let credito = 0;
+                if (qtdCont !== qtdPed) {
+                    credito = Math.abs(divergencia); // Crédito é a diferença absoluta, seja para mais ou para menos
+                }
+                creditoCell.textContent = formatCurrency(credito);
+
+                // Aplica a cor da linha
+                if (qtdCont === qtdPed) {
+                    row.className = 'row-green';
+                } else if (qtdCont > 0) {
+                    row.className = 'row-red';
+                } else {
+                    row.className = '';
+                }
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            window.location.href = '/relatorio';
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const firstCell = row.querySelector('td:first-child');
+                if (firstCell && row.querySelectorAll('td').length > 1) {
+                    const id = row.getAttribute('data-id');
+                    if (id) {
+                        updateRowColor(id); // Inicializa a linha com as cores e valores corretos
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Conferência</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .back-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #3498db;
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #2980b9;
+        }
+
+        .tab-button.active {
+            background-color: #2ecc71;
+        }
+
+        .search-container {
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-container form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-container input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .search-container button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #2ecc71;
+        }
+
+        .search-container button:hover {
+            background-color: #27ae60;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 1200px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .editable {
+            border: 1px solid #ccc;
+            padding: 5px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .row-green {
+            background-color: #90ee90;
+        }
+
+        .row-red {
+            background-color: #ff6347;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:last-child {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Relatório de Conferência</h1>
+        <div class="header-buttons">
+            <button class="back-btn" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a href="/separador" class="tab-button">Separador</a>
+        <a href="/conferencia" class="tab-button active">Conferente</a>
+        <a href="/suporte_logistico" class="tab-button">Suporte Logístico</a>
+        <a href="/credito_debito" class="tab-button">Crédito e Débito</a>
+    </div>
+
+    <div class="search-container">
+        <form action="/conferencia/buscar" method="post">
+            <input type="number" name="numero_pedido" placeholder="Digite o Nº Pedido" required>
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nº Pedido</th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Qtd Ped</th>
+                    <th>Qtd Cont</th>
+                    <th>Divergência</th>
+                    <th>Crédito</th>
+                    <th>Status</th>
+                    <th>Conferente</th>
+                    <th>Separador</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if dados and dados|length > 0 %}
+                    {% for item in dados %}
+                        {% if item['id'] is not none and item['quantidade_pedida'] is not none %}
+                            <tr data-id="{{ item['id']|e }}">
+                                <td>{{ item['numero_pedido'] if item['numero_pedido'] is not none else '-' }}</td>
+                                <td>{{ item['codigo'] if item['codigo'] is not none else '-' }}</td>
+                                <td>{{ item['descricao'] if item['descricao'] is not none else '-' }}</td>
+                                <td class="qtd-ped">{{ item['quantidade_pedida']|int if item['quantidade_pedida'] is not none else '-' }}</td>
+                                <td>
+                                    <input type="number" class="editable" id="qtd_cont_{{ item['id']|e }}" value="{{ item['quantidade_conferida']|int if item['quantidade_conferida'] is not none else 0 }}" onchange="updateRowColor('{{ item['id']|e }}')">
+                                </td>
+                                <td class="divergencia" id="divergencia_{{ item['id']|e }}">{{ item['divergencia']|int if item['divergencia'] is not none and item['divergencia'] != 0 else '' }}</td>
+                                <td class="credito" id="credito_{{ item['id']|e }}">R$ {{ item['credito']|float|round(2) if item['credito'] is not none else '0.00' }}</td>
+                                <td>{{ item['status'] if item['status'] is not none else '-' }}</td>
+                                <td>{{ item['conferente'] if item['conferente'] is not none else '-' }}</td>
+                                <td>{{ item['separador'] if item['separador'] is not none else '-' }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="10">Nenhum dado disponível.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        console.log("Dados recebidos no template:", {{ dados|tojson|safe }});
+
+        let qtd_cont = {};
+
+        function formatCurrency(value) {
+            return `R$ ${value.toFixed(2)}`;
+        }
+
+        function updateRowColor(id) {
+            const qtdContInput = document.getElementById(`qtd_cont_${id}`);
+            const divergenciaCell = document.getElementById(`divergencia_${id}`);
+            const creditoCell = document.getElementById(`credito_${id}`);
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            const qtdPedCell = row.querySelector('.qtd-ped');
+
+            if (qtdContInput && divergenciaCell && creditoCell && qtdPedCell) {
+                const qtdCont = parseInt(qtdContInput.value) || 0;
+                const qtdPed = parseInt(qtdPedCell.textContent) || 0;
+                qtd_cont[id] = qtdCont;
+
+                // Calcula a divergência
+                const divergencia = qtdCont - qtdPed;
+                divergenciaCell.textContent = divergencia !== 0 ? (divergencia > 0 ? `+${divergencia}` : divergencia) : '';
+
+                // Calcula o crédito
+                let credito = 0;
+                if (qtdCont !== qtdPed) {
+                    credito = Math.abs(divergencia); // Crédito é a diferença absoluta, seja para mais ou para menos
+                }
+                creditoCell.textContent = formatCurrency(credito);
+
+                // Aplica a cor da linha
+                if (qtdCont === qtdPed) {
+                    row.className = 'row-green';
+                } else if (qtdCont > 0) {
+                    row.className = 'row-red';
+                } else {
+                    row.className = '';
+                }
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            window.location.href = '/relatorio';
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const firstCell = row.querySelector('td:first-child');
+                if (firstCell && row.querySelectorAll('td').length > 1) {
+                    const id = row.getAttribute('data-id');
+                    if (id) {
+                        updateRowColor(id); // Inicializa a linha com as cores e valores corretos
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Romaneio de Transporte</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fff;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      color: #004080;
+      margin-bottom: 5px;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #555;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .header {
+      border-bottom: 2px solid #007BFF;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .info div {
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th,
+    td {
+      border: 1px solid #aaa;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 14px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+
+    .signature-line {
+      width: 48%;
+      text-align: center;
+    }
+
+    .signature-line hr {
+      margin: 10px auto;
+      width: 100%;
+      border: none;
+      border-top: 1px solid #000;
+    }
+
+    .print-button {
+      text-align: right;
+      margin-top: 30px;
+    }
+
+    @media print {
+      .print-button button {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Romaneio de Transporte</h1>
+    <p class="subtitle"><strong>ID do Romaneio:</strong> {{ romaneio.id }}</p>
+  </div>
+
+  <div class="info">
+    <div><strong>Placa do Caminhão:</strong> {{ romaneio.placa_caminhao or '-' }}</div>
+    <div><strong>Motorista:</strong> {{ romaneio.nome_motorista or '-' }}</div>
+    <div><strong>Data de Início:</strong> {{ data_inicio }}</div>
+    <div><strong>Data de Encerramento:</strong> {{ data_fim }}</div>
+    <div><strong>Filial:</strong> {{ romaneio.nome_filial or '-' }}</div>
+    <div><strong>Conferente:</strong> {{ romaneio.conferente or '-' }}</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nº Pedido</th>
+        <th>Destinatário</th>
+        <th>Volumes</th>
+        <th>Vol. Conferido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pedido in pedidos %}
+      <tr>
+        <td>{{ pedido.numero_pedido }}</td>
+        <td>{{ pedido.destinatario or 'Não informado' }}</td>
+        <td>{{ pedido.total_volumes }}</td>
+        <td></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Rodapé -->
+  <div class="footer">
+    <div class="summary">
+      <div>Total de Pedidos: <strong>{{ pedidos|length }}</strong></div>
+      <div>Total de Volumes: <strong>
+        {% set total_volumes = pedidos | sum(attribute='total_volumes') %}
+        {{ total_volumes }}
+      </strong></div>
+    </div>
+
+    <div class="signatures">
+      <div class="signature-line">
+        Assinatura do Motorista<br>
+        <hr>
+      </div>
+      <div class="signature-line">
+        Assinatura do Suporte Logístico<br>
+        <hr>
+      </div>
+    </div>
+  </div>
+
+  <div class="print-button">
+    <button onclick="window.print()">Imprimir</button>
+  </div>
+
+</body>
+</html>

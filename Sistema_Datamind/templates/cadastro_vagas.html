@@ -1,0 +1,432 @@
+
+
+
+   <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Vagas - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilo do container principal */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Estilo do formulário */
+        .cadastro-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .form-group .sugestao {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+            white-space: pre-wrap; /* Para exibir quebras de linha na descrição */
+        }
+
+        .form-group .btn-usar-sugestao {
+            margin-top: 5px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1abc9c;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-usar-sugestao:hover {
+            background-color: #16a085;
+        }
+
+        .btn-cadastrar {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #3498db;
+        }
+
+        .btn-cadastrar:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Cadastro de Vagas</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="cadastro-section">
+            <h2>Cadastro de Vagas</h2>
+            <div class="form-group">
+                <label for="titulo">Título da Vaga *</label>
+                <input type="text" id="titulo" placeholder="Ex.: Desenvolvedor Python" required>
+            </div>
+            <div class="form-group">
+                <label for="senioridade">Senioridade</label>
+                <select id="senioridade">
+                    <option value="">Selecione</option>
+                    <option value="Estagiário">Estagiário</option>
+                    <option value="Júnior">Júnior</option>
+                    <option value="Pleno">Pleno</option>
+                    <option value="Sênior">Sênior</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tipo_contrato">Tipo de Contrato</label>
+                <select id="tipo_contrato">
+                    <option value="">Selecione</option>
+                    <option value="CLT">CLT</option>
+                    <option value="PJ">PJ</option>
+                    <option value="Temporário">Temporário</option>
+                    <option value="Freelance">Freelance</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="localizacao">Localização</label>
+                <input type="text" id="localizacao" placeholder="Ex.: NATAL, RN">
+            </div>
+            <div class="form-group">
+                <label for="modalidade">Modalidade</label>
+                <select id="modalidade">
+                    <option value="">Selecione</option>
+                    <option value="Presencial">Presencial</option>
+                    <option value="Remoto">Remoto</option>
+                    <option value="Híbrido">Híbrido</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="faixa_salarial">Faixa Salarial</label>
+                <input type="text" id="faixa_salarial" placeholder="Ex.: R$ 5.000 - R$ 7.000">
+            </div>
+            <div class="form-group">
+                <label for="beneficios">Benefícios</label>
+                <textarea id="beneficios" placeholder="Ex.: Vale-refeição, plano de saúde, bônus anual" onclick="mostrarSugestao('beneficios')"></textarea>
+                <div class="sugestao" id="sugestaoBeneficios">Sugestão: Preencha o título para receber sugestões.</div>
+                <button class="btn-usar-sugestao" id="btnUsarSugestaoBeneficios" style="display: none;" onclick="usarSugestao('beneficios')">Usar Sugestão</button>
+            </div>
+            <div class="form-group">
+                <label for="descricao">Descrição da Vaga</label>
+                <textarea id="descricao" placeholder="Descreva as responsabilidades e expectativas para a vaga..." onclick="mostrarSugestao('descricao')"></textarea>
+                <div class="sugestao" id="sugestaoDescricao">Sugestão: Preencha o título para receber sugestões.</div>
+                <button class="btn-usar-sugestao" id="btnUsarSugestaoDescricao" style="display: none;" onclick="usarSugestao('descricao')">Usar Sugestão</button>
+            </div>
+            <div class="form-group">
+                <label for="requisitos">Requisitos *</label>
+                <textarea id="requisitos" placeholder="Ex.: Python, Flask, 2 anos de experiência" required onclick="mostrarSugestao('requisitos')"></textarea>
+                <div class="sugestao" id="sugestaoRequisitos">Sugestão: Preencha o título para receber sugestões.</div>
+                <button class="btn-usar-sugestao" id="btnUsarSugestaoRequisitos" style="display: none;" onclick="usarSugestao('requisitos')">Usar Sugestão</button>
+            </div>
+            <div class="form-group">
+                <label for="categoria">Categoria</label>
+                <select id="categoria">
+                    <option value="">Selecione</option>
+                    <option value="Tecnologia">Tecnologia</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Vendas">Vendas</option>
+                    <option value="Recursos Humanos">Recursos Humanos</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="prioridade">Prioridade</label>
+                <select id="prioridade">
+                    <option value="Baixa">Baixa</option>
+                    <option value="Média" selected>Média</option>
+                    <option value="Alta">Alta</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status">
+                    <option value="Aberta" selected>Aberta</option>
+                    <option value="Fechada">Fechada</option>
+                    <option value="Em Pausa">Em Pausa</option>
+                </select>
+            </div>
+            <button class="btn-cadastrar" onclick="cadastrarVaga()">Cadastrar Vaga</button>
+        </div>
+    </div>
+
+    <script>
+        let sugestoes = {
+            beneficios: '',
+            descricao: '',
+            requisitos: ''
+        };
+
+        document.getElementById('titulo').addEventListener('input', async function() {
+            const titulo = this.value.trim();
+            const sugestaoBeneficiosDiv = document.getElementById('sugestaoBeneficios');
+            const sugestaoDescricaoDiv = document.getElementById('sugestaoDescricao');
+            const sugestaoRequisitosDiv = document.getElementById('sugestaoRequisitos');
+            const btnUsarSugestaoBeneficios = document.getElementById('btnUsarSugestaoBeneficios');
+            const btnUsarSugestaoDescricao = document.getElementById('btnUsarSugestaoDescricao');
+            const btnUsarSugestaoRequisitos = document.getElementById('btnUsarSugestaoRequisitos');
+
+            if (titulo.length > 3) {
+                try {
+                    const response = await fetch('/sugerir_detalhes_vaga', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ titulo: titulo })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar sugestões de detalhes da vaga');
+                    }
+
+                    const data = await response.json();
+                    sugestoes.beneficios = data.beneficios;
+                    sugestoes.descricao = data.descricao;
+                    sugestoes.requisitos = data.requisitos;
+
+                    // Atualizar as sugestões nos campos
+                    sugestaoBeneficiosDiv.textContent = `Sugestão: ${sugestoes.beneficios}`;
+                    sugestaoDescricaoDiv.textContent = `Sugestão: ${sugestoes.descricao}`;
+                    sugestaoRequisitosDiv.textContent = `Sugestão: ${sugestoes.requisitos}`;
+
+                    // Mostrar as sugestões apenas se o campo estiver ativo
+                    sugestaoBeneficiosDiv.style.display = document.activeElement.id === 'beneficios' ? 'block' : 'none';
+                    sugestaoDescricaoDiv.style.display = document.activeElement.id === 'descricao' ? 'block' : 'none';
+                    sugestaoRequisitosDiv.style.display = document.activeElement.id === 'requisitos' ? 'block' : 'none';
+
+                    btnUsarSugestaoBeneficios.style.display = document.activeElement.id === 'beneficios' ? 'inline-block' : 'none';
+                    btnUsarSugestaoDescricao.style.display = document.activeElement.id === 'descricao' ? 'inline-block' : 'none';
+                    btnUsarSugestaoRequisitos.style.display = document.activeElement.id === 'requisitos' ? 'inline-block' : 'none';
+                } catch (err) {
+                    console.error('Erro ao buscar sugestões:', err);
+                    sugestaoBeneficiosDiv.textContent = 'Erro ao buscar sugestões.';
+                    sugestaoDescricaoDiv.textContent = 'Erro ao buscar sugestões.';
+                    sugestaoRequisitosDiv.textContent = 'Erro ao buscar sugestões.';
+                    sugestaoBeneficiosDiv.style.display = 'block';
+                    sugestaoDescricaoDiv.style.display = 'block';
+                    sugestaoRequisitosDiv.style.display = 'block';
+                    btnUsarSugestaoBeneficios.style.display = 'none';
+                    btnUsarSugestaoDescricao.style.display = 'none';
+                    btnUsarSugestaoRequisitos.style.display = 'none';
+                }
+            } else {
+                sugestaoBeneficiosDiv.textContent = 'Sugestão: Preencha o título para receber sugestões.';
+                sugestaoDescricaoDiv.textContent = 'Sugestão: Preencha o título para receber sugestões.';
+                sugestaoRequisitosDiv.textContent = 'Sugestão: Preencha o título para receber sugestões.';
+                sugestaoBeneficiosDiv.style.display = 'block';
+                sugestaoDescricaoDiv.style.display = 'block';
+                sugestaoRequisitosDiv.style.display = 'block';
+                btnUsarSugestaoBeneficios.style.display = 'none';
+                btnUsarSugestaoDescricao.style.display = 'none';
+                btnUsarSugestaoRequisitos.style.display = 'none';
+            }
+        });
+
+        function mostrarSugestao(campo) {
+            const sugestaoBeneficiosDiv = document.getElementById('sugestaoBeneficios');
+            const sugestaoDescricaoDiv = document.getElementById('sugestaoDescricao');
+            const sugestaoRequisitosDiv = document.getElementById('sugestaoRequisitos');
+            const btnUsarSugestaoBeneficios = document.getElementById('btnUsarSugestaoBeneficios');
+            const btnUsarSugestaoDescricao = document.getElementById('btnUsarSugestaoDescricao');
+            const btnUsarSugestaoRequisitos = document.getElementById('btnUsarSugestaoRequisitos');
+
+            // Mostrar apenas a sugestão do campo clicado
+            sugestaoBeneficiosDiv.style.display = campo === 'beneficios' ? 'block' : 'none';
+            sugestaoDescricaoDiv.style.display = campo === 'descricao' ? 'block' : 'none';
+            sugestaoRequisitosDiv.style.display = campo === 'requisitos' ? 'block' : 'none';
+
+            btnUsarSugestaoBeneficios.style.display = (campo === 'beneficios' && sugestoes.beneficios) ? 'inline-block' : 'none';
+            btnUsarSugestaoDescricao.style.display = (campo === 'descricao' && sugestoes.descricao) ? 'inline-block' : 'none';
+            btnUsarSugestaoRequisitos.style.display = (campo === 'requisitos' && sugestoes.requisitos) ? 'inline-block' : 'none';
+        }
+
+        function usarSugestao(campo) {
+            if (sugestoes[campo]) {
+                document.getElementById(campo).value = sugestoes[campo];
+            }
+        }
+
+        async function cadastrarVaga() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const senioridade = document.getElementById('senioridade').value;
+            const tipo_contrato = document.getElementById('tipo_contrato').value;
+            const localizacao = document.getElementById('localizacao').value.trim();
+            const modalidade = document.getElementById('modalidade').value;
+            const faixa_salarial = document.getElementById('faixa_salarial').value.trim();
+            const beneficios = document.getElementById('beneficios').value.trim();
+            const descricao = document.getElementById('descricao').value.trim();
+            const requisitos = document.getElementById('requisitos').value.trim();
+            const categoria = document.getElementById('categoria').value;
+            const prioridade = document.getElementById('prioridade').value;
+            const status = document.getElementById('status').value;
+
+            if (!titulo || !requisitos) {
+                alert('Por favor, preencha todos os campos obrigatórios (Título e Requisitos).');
+                return;
+            }
+
+            const dadosVaga = {
+                titulo,
+                senioridade: senioridade || null,
+                tipo_contrato: tipo_contrato || null,
+                localizacao: localizacao || null,
+                modalidade: modalidade || null,
+                faixa_salarial: faixa_salarial || null,
+                beneficios: beneficios || null,
+                descricao: descricao || null,
+                requisitos,
+                categoria: categoria || null,
+                prioridade,
+                status
+            };
+
+            try {
+                const response = await fetch('/cadastrar_vaga', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosVaga)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro ao cadastrar vaga: ${errorText}`);
+                }
+
+                const result = await response.json();
+                alert(result.message);
+                // Limpar o formulário
+                document.querySelectorAll('input, textarea, select').forEach(field => {
+                    if (field.type !== 'button') field.value = '';
+                });
+                document.getElementById('prioridade').value = 'Média';
+                document.getElementById('status').value = 'Aberta';
+                document.getElementById('sugestaoBeneficios').style.display = 'none';
+                document.getElementById('sugestaoDescricao').style.display = 'none';
+                document.getElementById('sugestaoRequisitos').style.display = 'none';
+                document.getElementById('btnUsarSugestaoBeneficios').style.display = 'none';
+                document.getElementById('btnUsarSugestaoDescricao').style.display = 'none';
+                document.getElementById('btnUsarSugestaoRequisitos').style.display = 'none';
+                sugestoes = { beneficios: '', descricao: '', requisitos: '' };
+            } catch (err) {
+                console.error('Erro ao cadastrar vaga:', err);
+                alert(`Erro ao cadastrar vaga: ${err.message}`);
+            }
+        }
+
+        function voltar() {
+            window.location.href = '/cv_analise';
+        }
+
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>

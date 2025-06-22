@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acompanhamento de Solicitações - Depósito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+            position: relative;
+        }
+        .header {
+            background-color: #34495e;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 20px;
+        }
+        .header .nav-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .header a {
+            text-decoration: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .header a.sair {
+            background-color: #e74c3c;
+        }
+        .header a.sair:hover {
+            background-color: #c0392b;
+        }
+        .header a.home {
+            background-color: #2ecc71;
+        }
+        .header a.home:hover {
+            background-color: #27ae60;
+        }
+        .header .notification {
+            position: relative;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .header .notification .badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+        .notification-panel {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .notification-panel.show {
+            display: block;
+        }
+        .notification-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .filters {
+            background-color: white;
+            padding: 15px;
+            margin: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filters label {
+            font-weight: bold;
+            color: #333;
+        }
+        .filters select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 150px;
+        }
+        .filters button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            background-color: #007bff;
+        }
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+        .content {
+            margin: 20px;
+        }
+        .content p {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            color: #333;
+        }
+        th {
+            background-color: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+        .no-results {
+            margin: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #333;
+        }
+        .error-message {
+            margin: 20px;
+            padding: 15px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            color: #721c24;
+        }
+        .debug {
+            margin: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        .ver-obs-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        .ver-obs-btn:hover {
+            background-color: #0056b3;
+        }
+        .ver-obs-btn.active {
+            background-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .modal-content p {
+            color: #333;
+        }
+        .modal-content textarea {
+            width: 100%;
+            height: 100px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .modal-content button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .modal-content button.enviar {
+            background-color: #28a745;
+        }
+        .modal-content button.enviar:hover {
+            background-color: #218838;
+        }
+        .modal-content button.responder {
+            background-color: #17a2b8;
+        }
+        .modal-content button.responder:hover {
+            background-color: #138496;
+        }
+        .modal-content button.fechar {
+            background-color: #dc3545;
+        }
+        .modal-content button.fechar:hover {
+            background-color: #c82333;
+        }
+        .historico-mensagens {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .historico-mensagens p {
+            margin: 5px 0;
+        }
+        .status-cell {
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+        }
+        .status-text {
+            display: inline-block;
+        }
+        .status-dropdown {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            min-width: 100px;
+            top: 100%;
+            left: 0;
+        }
+        .status-dropdown.show {
+            display: block;
+        }
+        .status-option {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .status-option:hover {
+            background-color: #f0f0f0;
+        }
+        .status-option.pendente {
+            color: #007bff;
+        }
+        .status-option.aprovada {
+            color: #28a745;
+        }
+        .status-option.cancelada {
+            color: #dc3545;
+        }
+        .status-pendente {
+            color: #007bff;
+        }
+        .status-aprovada {
+            color: #28a745;
+        }
+        .status-cancelada {
+            color: #dc3545;
+        }
+        .confirmation-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1002;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            color: white;
+        }
+        .confirmation-message.show {
+            display: block;
+            opacity: 1;
+        }
+        .confirmation-message.pendente {
+            background-color: #007bff;
+        }
+        .confirmation-message.aprovada {
+            background-color: #28a745;
+        }
+        .confirmation-message.cancelada {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Acompanhamento de Solicitações - Depósito</h1>
+        <div class="nav-buttons">
+            <span class="notification" onclick="toggleNotifications()">🔔<span class="badge" id="notification-badge">0</span></span>
+            <a href="#" class="sair">Sair</a>
+            <a href="#" class="home">Home</a>
+        </div>
+    </div>
+
+    {% if erro %}
+        <div class="error-message">
+            {{ erro }}
+        </div>
+    {% endif %}
+
+    <div class="filters">
+        <label for="filial">Filial:</label>
+        <select id="filial" name="filial">
+            <option value="">Selecione a Filial</option>
+            <option value="all">Todas as Lojas</option>
+            {% for f in filiais %}
+                <option value="{{ f.filial_id1 }}" {% if filial_id == f.filial_id1|string %}selected{% endif %}>
+                    {{ f.filial_nome1 }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="">Selecione o Status</option>
+            <option value="all">Todos os Status</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Cancelada">Cancelada</option>
+        </select>
+
+        <button onclick="aplicarFiltros()">Aplicar Filtros</button>
+    </div>
+
+    <div class="content">
+        <p>Solicitações pendentes para o depósito:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Número da Solicitação</th>
+                    <th>Filial</th>
+                    <th>Tipo</th>
+                    <th>Título</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                    <th>Data/Hora</th>
+                    <th>Matrícula</th>
+                    <th>Nome do Usuário</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-solicitacoes">
+                {% for solicitacao in solicitacoes %}
+                    <tr data-id="{{ solicitacao.id }}">
+                        <td>{{ solicitacao.numero_solicitacao }}</td>
+                        <td>{{ solicitacao.filial_nome }}</td>
+                        <td>{{ solicitacao.tipo_solicitacao }}</td>
+                        <td>{{ solicitacao.titulo }}</td>
+                        <td>
+                            <button class="ver-obs-btn" data-id="{{ solicitacao.numero_solicitacao }}" data-descricao='{{ solicitacao.descricao|tojson }}' onclick="openPopup(this)">Ver Obs</button>
+                        </td>
+                        <td>{{ solicitacao.quantidade }}</td>
+                        <td class="status-cell" data-id="{{ solicitacao.id }}">
+                            <span class="status-text status-{{ solicitacao.status|lower }}">{{ solicitacao.status }}</span>
+                        </td>
+                        <td>{{ solicitacao.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ solicitacao.matricula }}</td>
+                        <td>{{ solicitacao.nome_usuario }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if not solicitacoes %}
+            <div class="no-results">
+                Nenhuma solicitação encontrada.
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="notification-panel" id="notification-panel"></div>
+
+    <div id="popupDescricao" class="modal">
+        <div class="modal-content">
+            <h3>Histórico de Perguntas e Respostas</h3>
+            <p><strong>Descrição da Solicitação:</strong> <span id="descricaoConteudo"></span></p>
+            <div class="historico-mensagens" id="historico-mensagens"></div>
+            <textarea id="resposta" placeholder="Digite sua resposta..."></textarea>
+            <div class="modal-buttons">
+                <button class="enviar" onclick="enviarAcao()">Enviar</button>
+                <button class="responder" onclick="responderAcao()">Responder</button>
+                <button class="fechar" onclick="fecharPopup()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationMessage" class="confirmation-message"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Página carregada');
+            updateNotificationCount();
+            const statusCells = document.querySelectorAll('.status-cell');
+            statusCells.forEach(cell => {
+                cell.addEventListener('click', () => {
+                    const idSolicitacao = cell.getAttribute('data-id');
+                    const currentStatus = cell.querySelector('.status-text').innerText;
+                    console.log('Clicado na célula de status - ID:', idSolicitacao, 'Status Atual:', currentStatus);
+                    toggleStatusDropdown(cell, idSolicitacao, currentStatus);
+                });
+            });
+        });
+
+        async function aplicarFiltros() {
+            console.log('Aplicando filtros...');
+            const filial = document.getElementById('filial').value === 'all' ? '' : document.getElementById('filial').value;
+            const status = document.getElementById('status').value === 'all' ? '' : document.getElementById('status').value;
+            const url = `/acomp_solic_deposito?filial_id=${filial}&status=${status}&format=json`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+                const data = await response.json();
+                const solicitacoes = data.solicitacoes || [];
+                const tabela = document.getElementById('tabela-solicitacoes');
+                tabela.innerHTML = '';
+                if (solicitacoes.length === 0) {
+                    const content = document.querySelector('.content');
+                    let noResults = content.querySelector('.no-results');
+                    if (!noResults) {
+                        noResults = document.createElement('div');
+                        noResults.className = 'no-results';
+                        noResults.innerText = 'Nenhuma solicitação encontrada.';
+                        content.appendChild(noResults);
+                    }
+                } else {
+                    solicitacoes.forEach(s => {
+                        const row = tabela.insertRow();
+                        row.setAttribute('data-id', s.id);
+                        // Formatar a data manualmente para evitar problemas de fuso horário
+                        const dataHora = new Date(s.data_hora);
+                        const dataFormatada = `${dataHora.getDate().toString().padStart(2, '0')}/${(dataHora.getMonth() + 1).toString().padStart(2, '0')}/${dataHora.getFullYear()} ${dataHora.getHours().toString().padStart(2, '0')}:${dataHora.getMinutes().toString().padStart(2, '0')}`;
+                        row.innerHTML = `
+                            <td>${s.numero_solicitacao}</td>
+                            <td>${s.filial_nome}</td>
+                            <td>${s.tipo_solicitacao}</td>
+                            <td>${s.titulo}</td>
+                            <td>
+                                <button class="ver-obs-btn" data-id="${s.numero_solicitacao}" data-descricao='${JSON.stringify(s.descricao)}' onclick="openPopup(this)">Ver Obs</button>
+                            </td>
+                            <td>${s.quantidade}</td>
+                            <td class="status-cell" data-id="${s.id}">
+                                <span class="status-text status-${s.status.toLowerCase()}">${s.status}</span>
+                            </td>
+                            <td>${dataFormatada}</td>
+                            <td>${s.matricula || '-'}</td>
+                            <td>${s.nome_usuario || '-'}</td>
+                        `;
+                    });
+                    const noResults = document.querySelector('.no-results');
+                    if (noResults) noResults.remove();
+
+                    const statusCells = document.querySelectorAll('.status-cell');
+                    statusCells.forEach(cell => {
+                        cell.addEventListener('click', () => {
+                            const idSolicitacao = cell.getAttribute('data-id');
+                            const currentStatus = cell.querySelector('.status-text').innerText;
+                            console.log('Clicado na célula de status - ID:', idSolicitacao, 'Status Atual:', currentStatus);
+                            toggleStatusDropdown(cell, idSolicitacao, currentStatus);
+                        });
+                    });
+                }
+                updateNotificationCount();
+            } catch (error) {
+                console.error('Erro ao aplicar filtros:', error);
+                alert('Erro ao aplicar filtros: ' + error.message);
+            }
+        }
+
+        async function updateNotificationCount() {
+            console.log('Atualizando contagem de notificações...');
+            try {
+                const response = await fetch('/notificacoes/count');
+                if (!response.ok) throw new Error('Erro na requisição: ' + response.status);
+                const data = await response.json();
+                document.getElementById('notification-badge').innerText = data.count || 0;
+            } catch (error) {
+                console.error('Erro ao atualizar contagem de notificações:', error);
+                document.getElementById('notification-badge').innerText = '0';
+            }
+        }
+
+        async function toggleNotifications() {
+            console.log('Toggling notificações...');
+            const panel = document.getElementById('notification-panel');
+            const tabela = document.getElementById('tabela-solicitacoes');
+            panel.innerHTML = '';
+
+            if (panel.classList.contains('show')) {
+                panel.classList.remove('show');
+                return;
+            }
+
+            for (let row of tabela.rows) {
+                const numero = row.cells[0].innerText;
+                const status = row.cells[6].innerText;
+                let notificacao = `<div class="notification-item">Solicitação #${numero}<br>Status: ${status}</div>`;
+                panel.innerHTML += notificacao;
+            }
+
+            panel.classList.add('show');
+        }
+
+        function openPopup(button) {
+            console.log('Botão Ver Obs clicado');
+            try {
+                const idSolicitacao = button.getAttribute('data-id');
+                const descricao = button.getAttribute('data-descricao');
+                console.log('ID:', idSolicitacao, 'Descrição bruta:', descricao);
+
+                let descricaoLimpa;
+                try {
+                    descricaoLimpa = JSON.parse(descricao);
+                } catch (e) {
+                    console.error('Erro ao parsear descrição:', e);
+                    descricaoLimpa = descricao || 'Descrição indisponível';
+                }
+                console.log('Descrição limpa:', descricaoLimpa);
+
+                const popup = document.getElementById('popupDescricao');
+                const descricaoConteudo = document.getElementById('descricaoConteudo');
+                const historicoDiv = document.getElementById('historico-mensagens');
+
+                if (popup && descricaoConteudo && historicoDiv) {
+                    // Limpar o textarea e marcar o botão como ativo
+                    document.getElementById('resposta').value = '';
+                    document.querySelector('.ver-obs-btn.active')?.classList.remove('active');
+                    button.classList.add('active');
+
+                    // Exibir a descrição
+                    descricaoConteudo.innerText = descricaoLimpa;
+                    popup.style.display = 'flex';
+                    console.log('Popup exibido com sucesso');
+
+                    // Carregar o histórico
+                    fetch(`/historico/${idSolicitacao}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            historicoDiv.innerHTML = '';
+                            if (data.success && data.historico.length > 0) {
+                                data.historico.forEach(item => {
+                                    const mensagem = document.createElement('p');
+                                    // Formatar a data do histórico
+                                    const dataMensagem = new Date(item.data_hora);
+                                    const dataFormatada = `${dataMensagem.getDate().toString().padStart(2, '0')}/${(dataMensagem.getMonth() + 1).toString().padStart(2, '0')}/${dataMensagem.getFullYear()} ${dataMensagem.getHours().toString().padStart(2, '0')}:${dataMensagem.getMinutes().toString().padStart(2, '0')}`;
+                                    mensagem.innerHTML = `<strong>${item.nome_filial} (${item.nome_usuario}) - ${dataFormatada}</strong>: ${item.mensagem}`;
+                                    historicoDiv.appendChild(mensagem);
+                                });
+                            } else {
+                                historicoDiv.innerHTML = '<p>Nenhuma mensagem encontrada.</p>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao carregar histórico:', error);
+                            historicoDiv.innerHTML = '<p>Erro ao carregar histórico.</p>';
+                        });
+                } else {
+                    console.error('Elemento popupDescricao, descricaoConteudo ou historico-mensagens não encontrado');
+                }
+            } catch (error) {
+                console.error('Erro ao abrir popup:', error);
+            }
+        }
+
+        function fecharPopup() {
+            console.log('Fechando popup...');
+            const popup = document.getElementById('popupDescricao');
+            if (popup) {
+                popup.style.display = 'none';
+                document.getElementById('resposta').value = '';
+                console.log('Popup fechado');
+            } else {
+                console.error('Elemento popupDescricao não encontrado ao fechar');
+            }
+        }
+
+        function enviarAcao() {
+            console.log('Enviando ação...');
+            alert('Ação enviada para a solicitação!');
+            fecharPopup();
+        }
+
+        async function responderAcao() {
+            console.log('Respondendo ação...');
+            const resposta = document.getElementById('resposta').value;
+            if (resposta.trim() === '') {
+                alert('Por favor, insira uma resposta.');
+                return;
+            }
+
+            const popupButton = document.querySelector('.ver-obs-btn.active');
+            const solicitacaoId = popupButton ? popupButton.getAttribute('data-id') : null;
+            if (!solicitacaoId) {
+                console.error('solicitacao_id não encontrado');
+                alert('Erro: solicitacao_id não encontrado.');
+                return;
+            }
+
+            console.log(`Enviando solicitação para /salvar_resposta com solicitacao_id: ${solicitacaoId}, mensagem: ${resposta}`);
+
+            try {
+                const response = await fetch('/salvar_resposta', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        solicitacao_id: solicitacaoId,
+                        mensagem: resposta
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Resultado do backend:', result);
+
+                if (result.success) {
+                    alert('Resposta enviada com sucesso: ' + resposta);
+                    openPopup(popupButton); // Recarregar o histórico
+                } else {
+                    console.error('Erro retornado pelo backend:', result.error);
+                    alert('Erro ao enviar a resposta: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro ao chamar a API:', error);
+                alert('Erro ao enviar a resposta: ' + error.message);
+            }
+        }
+
+        function toggleStatusDropdown(cell, idSolicitacao, currentStatus) {
+            console.log('toggleStatusDropdown chamado - ID:', idSolicitacao, 'Status Atual:', currentStatus);
+
+            const existingDropdowns = document.querySelectorAll('.status-dropdown');
+            existingDropdowns.forEach(dropdown => dropdown.remove());
+
+            const dropdown = document.createElement('div');
+            dropdown.className = 'status-dropdown show';
+            dropdown.innerHTML = `
+                <div class="status-option pendente" onclick="selectStatus('${idSolicitacao}', 'Pendente', this)">Pendente</div>
+                <div class="status-option aprovada" onclick="selectStatus('${idSolicitacao}', 'Aprovada', this)">Aprovada</div>
+                <div class="status-option cancelada" onclick="selectStatus('${idSolicitacao}', 'Cancelada', this)">Cancelada</div>
+            `;
+            console.log('Dropdown criado:', dropdown);
+
+            cell.appendChild(dropdown);
+            console.log('Dropdown adicionado à célula');
+
+            setTimeout(() => {
+                const closeDropdown = (e) => {
+                    if (!dropdown.contains(e.target) && e.target !== cell && !cell.contains(e.target)) {
+                        dropdown.remove();
+                        document.removeEventListener('click', closeDropdown);
+                        console.log('Dropdown fechado');
+                    }
+                };
+                document.addEventListener('click', closeDropdown);
+            }, 0);
+        }
+
+        async function selectStatus(idSolicitacao, newStatus, option) {
+            console.log('Selecionado status:', newStatus, 'para ID:', idSolicitacao);
+            const cell = document.querySelector(`td.status-cell[data-id="${idSolicitacao}"]`);
+            if (!cell) {
+                console.error('Célula de status não encontrada para ID:', idSolicitacao);
+                alert('Erro: Célula de status não encontrada.');
+                return;
+            }
+
+            const confirmacao = confirm(`Deseja confirmar a mudança para ${newStatus}?`);
+            if (!confirmacao) {
+                cell.querySelector('.status-dropdown')?.remove();
+                console.log('Mudança cancelada pelo usuário');
+                return;
+            }
+
+            try {
+                let response;
+                if (newStatus === 'Aprovada') {
+                    console.log(`Enviando requisição para aprovar solicitação ID ${idSolicitacao}`);
+                    response = await fetch(`/aprovar_solicitacao/${idSolicitacao}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } else if (newStatus === 'Cancelada') {
+                    console.log(`Enviando requisição para cancelar solicitação ID ${idSolicitacao}`);
+                    response = await fetch(`/cancelar_solicitacao/${idSolicitacao}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } else {
+                    console.log('Atualizando status para Pendente apenas na interface');
+                    const statusText = cell.querySelector('.status-text');
+                    statusText.innerText = newStatus;
+                    statusText.className = `status-text status-${newStatus.toLowerCase()}`;
+                    cell.querySelector('.status-dropdown')?.remove();
+                    console.log('Status atualizado para:', newStatus);
+
+                    const confirmationMessage = document.getElementById('confirmationMessage');
+                    confirmationMessage.innerText = `Mudou para ${newStatus}`;
+                    confirmationMessage.className = `confirmation-message show ${newStatus.toLowerCase()}`;
+                    setTimeout(() => {
+                        confirmationMessage.classList.remove('show');
+                    }, 3000);
+                    updateNotificationCount();
+                    return;
+                }
+
+                console.log('Resposta recebida do backend:', response);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Erro na requisição:', response.status, response.statusText, errorText);
+                    throw new Error(`Erro na requisição: ${response.status} - ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('Resultado do backend:', result);
+
+                if (result.success) {
+                    const statusText = cell.querySelector('.status-text');
+                    statusText.innerText = newStatus;
+                    statusText.className = `status-text status-${newStatus.toLowerCase()}`;
+                    cell.querySelector('.status-dropdown')?.remove();
+                    console.log('Status atualizado para:', newStatus);
+
+                    const confirmationMessage = document.getElementById('confirmationMessage');
+                    confirmationMessage.innerText = `Mudou para ${newStatus}`;
+                    confirmationMessage.className = `confirmation-message show ${newStatus.toLowerCase()}`;
+                    setTimeout(() => {
+                        confirmationMessage.classList.remove('show');
+                    }, 3000);
+                    updateNotificationCount();
+                } else {
+                    console.error('Erro retornado pelo backend:', result.error);
+                    alert('Erro ao atualizar o status: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro ao chamar a API:', error);
+                alert('Erro ao atualizar o status: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

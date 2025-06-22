@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerar Questionário - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .header h1 {
+            font-size: 24px;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-voltar {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #1abc9c;
+        }
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .formulario-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .questao {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .questao label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .questao input[type="text"],
+        .questao input[type="radio"] {
+            margin: 5px 0;
+        }
+        .questao input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .questao .alternativa {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        .btn-salvar {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-salvar:hover {
+            background-color: #2980b9;
+        }
+        .loading {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Gerar Questionário - <span id="candidateName"></span></h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="window.location.href='/selecionar_candidatos'">Voltar</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="formulario-section" id="formularioContent">
+            <h2>Carregando perguntas...</h2>
+        </div>
+        <button class="btn-salvar" id="btnSalvar" style="display: none;" onclick="salvarQuestionario()">Salvar Questionário</button>
+    </div>
+
+    <script>
+        let currentCandidatoId = {{ candidato_id | tojson }};
+        let currentQuestionario = [];
+
+        // Função para lidar com erro 401 e redirecionar para o login
+        function handleUnauthenticated() {
+            console.log('Usuário não autenticado. Redirecionando para a página de login.');
+            window.location.href = '/login';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const formularioContent = document.getElementById('formularioContent');
+            const candidateNameSpan = document.getElementById('candidateName');
+            const btnSalvar = document.getElementById('btnSalvar');
+
+            // Buscar o nome do candidato
+            console.log('Buscando nome do candidato para ID:', currentCandidatoId);
+            fetch(`/get_candidate_name/${currentCandidatoId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Resposta da busca do candidato:', response);
+                if (response.status === 401) {
+                    handleUnauthenticated();
+                    throw new Error('Usuário não autenticado');
+                }
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Dados do candidato:', data);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                candidateNameSpan.textContent = data.nome || 'Candidato Desconhecido';
+            })
+            .catch(err => {
+                console.error('Erro ao buscar nome do candidato:', err.message);
+                candidateNameSpan.textContent = 'Erro ao carregar nome';
+            });
+
+            // Buscar as perguntas
+            console.log('Buscando perguntas para candidato ID:', currentCandidatoId);
+            fetch(`/gerar_perguntas/${currentCandidatoId}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log('Resposta da geração de perguntas:', response);
+                if (response.status === 401) {
+                    handleUnauthenticated();
+                    throw new Error('Usuário não autenticado');
+                }
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Perguntas recebidas:', data.perguntas);
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                if (!Array.isArray(data.perguntas)) {
+                    formularioContent.innerHTML = '<p class="error">Erro: As perguntas não foram carregadas corretamente.</p>';
+                    return;
+                }
+
+                currentQuestionario = data.perguntas;
+                formularioContent.innerHTML = '<h2>Editar Questionário</h2>';
+                data.perguntas.forEach((pergunta, index) => {
+                    const questaoDiv = document.createElement('div');
+                    questaoDiv.classList.add('questao');
+                    questaoDiv.innerHTML = `
+                        <label>Pergunta ${index + 1}: <input type="text" value="${pergunta.pergunta}" data-index="${index}" class="pergunta-input"></label>
+                        ${pergunta.alternativas.map((alt, i) => `
+                            <div class="alternativa">
+                                <input type="radio" name="correta-${index}" value="${String.fromCharCode(97 + i)}" ${pergunta.correta === String.fromCharCode(97 + i) ? 'checked' : ''}>
+                                <input type="text" value="${alt}" data-index="${index}" data-alt="${String.fromCharCode(97 + i)}" class="alternativa-input">
+                            </div>
+                        `).join('')}
+                    `;
+                    formularioContent.appendChild(questaoDiv);
+                });
+
+                btnSalvar.style.display = 'block';
+            })
+            .catch(err => {
+                console.error('Erro ao buscar perguntas:', err.message);
+                formularioContent.innerHTML = `<p class="error">Erro ao carregar perguntas: ${err.message}</p>`;
+            });
+        });
+
+        function salvarQuestionario() {
+            const perguntasInputs = document.querySelectorAll('.pergunta-input');
+            const alternativasInputs = document.querySelectorAll('.alternativa-input');
+            const corretasInputs = document.querySelectorAll('input[type="radio"]:checked');
+            const formularioContent = document.getElementById('formularioContent');
+            const btnSalvar = document.getElementById('btnSalvar');
+
+            for (let index = 0; index < perguntasInputs.length; index++) {
+                const correta = Array.from(corretasInputs).find(input => input.name === `correta-${index}`);
+                if (!correta) {
+                    alert(`Por favor, selecione uma alternativa correta para a pergunta ${index + 1}.`);
+                    return;
+                }
+            }
+
+            perguntasInputs.forEach(input => {
+                const index = parseInt(input.getAttribute('data-index'));
+                currentQuestionario[index].pergunta = input.value;
+            });
+
+            alternativasInputs.forEach(input => {
+                const index = parseInt(input.getAttribute('data-index'));
+                const alt = input.getAttribute('data-alt');
+                currentQuestionario[index].alternativas[alt.charCodeAt(0) - 97] = input.value;
+            });
+
+            corretasInputs.forEach(input => {
+                const index = parseInt(input.name.split('-')[1]);
+                currentQuestionario[index].correta = input.value;
+            });
+
+            btnSalvar.disabled = true;
+            formularioContent.innerHTML = '<p class="loading">Salvando questionário...</p>';
+
+            fetch(`/salvar_questionario/${currentCandidatoId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ perguntas: currentQuestionario })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || `Erro ao salvar questionário: Status ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Questionário salvo com sucesso:', data);
+                alert('Questionário salvo com sucesso!');
+                window.location.href = '/selecionar_candidatos';
+            })
+            .catch(err => {
+                console.error('Erro ao salvar questionário:', err.message);
+                formularioContent.innerHTML = `<p class="error">Erro ao salvar questionário: ${err.message}</p>`;
+                btnSalvar.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

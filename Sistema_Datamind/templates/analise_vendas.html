@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análise de Vendas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background-color: #0f0f1b;     
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #00ffff;
+      margin-bottom: 20px;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    label {
+      font-size: 16px;
+      color: #ccc;
+    }
+    select, input[type="date"] {
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: none;
+      background-color: #1a1a2e;
+      color: #00ffff;
+    }
+    button {
+      padding: 10px 20px;
+      background: linear-gradient(to right, #00ffff, #9b59b6);
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: linear-gradient(to right, #00eeee, #8e44ad);
+      box-shadow: 0 0 10px #00ffff;
+    }
+    canvas {
+      margin-top: 40px;
+      background-color: #1a1a2e;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 800px;
+      max-height: 300px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background-color: #1a1a2e;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #2c2c54;
+      text-align: left;
+    }
+    th {
+      background-color: #2c2c54;
+      color: #00ffff;
+    }
+    .error-message {
+      color: #FF6384;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Análise de Vendas</h1>
+
+  <!-- Filtros -->
+  <div class="filters">
+    <div>
+      <label for="loja">Loja:</label><br>
+      <select id="loja">
+        <option value="">-- Selecione --</option>
+        <option value="1">PONTA NEGRA</option>
+        <option value="2">ALECRIM</option>
+        <option value="7">SAC - CENTRO VI</option>
+        <option value="100">LAGOA NOVA</option>
+        <option value="121">NORTE SHOPPING</option>
+        <option value="122">PARNAMIRIM</option>
+        <option value="131">ZN2</option>
+        <option value="137">MACAIBA</option>
+        <option value="140">MARIA LACERDA</option>
+        <option value="141">IGAPO</option>
+      </select>
+    </div>
+    <div>
+      <label for="data_inicio">Data Início:</label><br>
+      <input type="date" id="data_inicio">
+    </div>
+    <div>
+      <label for="data_fim">Data Fim:</label><br>
+      <input type="date" id="data_fim">
+    </div>
+    <div>
+      <br>
+      <button onclick="buscarVendas()">Buscar</button>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <canvas id="graficoPizza"></canvas>
+  <div id="graficoLinhaContainer">
+    <canvas id="graficoLinha"></canvas>
+    <div id="graficoLinhaError" class="error-message"></div>
+  </div>
+  <div id="graficoFornecedoresContainer">
+    <canvas id="graficoFornecedores"></canvas>
+    <div id="graficoFornecedoresError" class="error-message"></div>
+  </div>
+  <canvas id="graficoProdutosMaisVendidos"></canvas>
+
+  <!-- Tabela com Curva ABC -->
+  <table id="tabelaVendas">
+    <thead>
+      <tr>
+        <th>Grupo</th>
+        <th>Produto</th>
+        <th>Faturamento</th>
+        <th>Quantidade Vendida</th>
+        <th>Lucro</th>
+        <th>Classificação ABC</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="exportarCSV()" style="margin-top:20px;">Exportar para CSV</button>
+</div>
+
+<script>
+let graficoPizza = null;
+let graficoLinha = null;
+let graficoFornecedores = null;
+let graficoBarrasHorizontais = null;
+
+function buscarVendas() {
+  const id_loja = document.getElementById("loja").value;
+  const data_inicio = document.getElementById("data_inicio").value;
+  const data_fim = document.getElementById("data_fim").value;
+
+  if (!id_loja) {
+    alert("Selecione uma loja.");
+    return;
+  }
+  if (data_inicio && data_fim && new Date(data_fim) < new Date(data_inicio)) {
+    alert("A data final deve ser posterior à data inicial.");
+    return;
+  }
+
+  let url = `/api/vendas?id_loja=${id_loja}`;
+  if (data_inicio) url += `&data_inicio=${data_inicio}`;
+  if (data_fim) url += `&data_fim=${data_fim}`;
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error(`Erro na requisição: ${res.status} - ${res.statusText}`);
+      return res.json();
+    })
+    .then(dados => {
+      console.log('Dados recebidos:', dados); // Log para depuração
+      preencherTabela(dados);
+      desenharGraficoPizza(dados);
+      desenharGraficoLinha(dados);
+      desenharGraficoFornecedores(dados);
+      desenharGraficoProdutosMaisVendidos(dados);
+    })
+    .catch(err => {
+      alert(`Erro ao buscar dados: ${err.message}`);
+      console.error('Erro completo:', err);
+    });
+}
+
+function preencherTabela(dados) {
+  const tbody = document.querySelector("#tabelaVendas tbody");
+  tbody.innerHTML = "";
+
+  if (!dados || dados.length === 0) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td colspan="6">Nenhum dado encontrado.</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  const totalFaturamento = dados.reduce((sum, d) => sum + parseFloat(d.faturamento || 0), 0);
+  let acumulado = 0;
+
+  dados.sort((a, b) => parseFloat(b.faturamento || 0) - parseFloat(a.faturamento || 0)).forEach(item => {
+    acumulado += parseFloat(item.faturamento || 0);
+    const percentualAcumulado = totalFaturamento ? (acumulado / totalFaturamento) * 100 : 0;
+    let classeABC = "C";
+    if (percentualAcumulado <= 80) classeABC = "A";
+    else if (percentualAcumulado <= 95) classeABC = "B";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.grupo || 'Desconhecido'}</td>
+      <td>${item.produto || 'Desconhecido'}</td>
+      <td>R$ ${parseFloat(item.faturamento || 0).toFixed(2)}</td>
+      <td>${parseFloat(item.quantidade_vendida || 0).toFixed(2)}</td>
+      <td>R$ ${parseFloat(item.lucro || 0).toFixed(2)}</td>
+      <td>${classeABC}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function desenharGraficoPizza(dados) {
+  const ctx = document.getElementById("graficoPizza").getContext("2d");
+  if (graficoPizza) graficoPizza.destroy();
+
+  const labels = [...new Set(dados.map(d => d.grupo || 'Desconhecido'))];
+  const backgroundColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+  const datasets = [{
+    label: 'Faturamento por Grupo',
+    data: labels.map(grupo =>
+      dados.filter(d => d.grupo === grupo)
+           .reduce((sum, d) => sum + parseFloat(d.faturamento || 0), 0)
+    ),
+    backgroundColor: backgroundColors.slice(0, labels.length)
+  }];
+
+  graficoPizza = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { labels: { color: "#00ffff" } },
+        title: { display: true, text: 'Faturamento por Grupo', color: '#00ffff' }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: "#aaa" } },
+        y: { stacked: true, beginAtZero: true, ticks: { color: "#aaa" } }
+      }
+    }
+  });
+}
+
+function desenharGraficoLinha(dados) {
+  const ctx = document.getElementById("graficoLinha").getContext("2d");
+  const errorDiv = document.getElementById("graficoLinhaError");
+  if (graficoLinha) graficoLinha.destroy();
+  errorDiv.innerHTML = ""; // Limpa mensagens de erro anteriores
+
+  const dadosPorDia = {};
+  dados.forEach(d => {
+    let data = d.data || 'Sem Data';
+    // Valida se a data está no formato esperado (YYYY-MM-DD)
+    if (data !== 'Sem Data' && !/^\d{4}-\d{2}-\d{2}$/.test(data)) {
+      console.warn(`Formato de data inválido: ${data}`);
+      data = 'Formato Inválido';
+    }
+    if (!dadosPorDia[data]) dadosPorDia[data] = 0;
+    dadosPorDia[data] += parseFloat(d.faturamento || 0);
+  });
+
+  console.log('Dados agrupados por dia:', dadosPorDia); // Log para depuração
+
+  const labels = Object.keys(dadosPorDia).sort((a, b) => {
+    if (a === 'Sem Data' || a === 'Formato Inválido') return 1;
+    if (b === 'Sem Data' || b === 'Formato Inválido') return -1;
+    return new Date(a) - new Date(b);
+  });
+  const dataValues = labels.map(d => dadosPorDia[d]);
+
+  if (labels.length === 0 || labels.every(label => label === 'Sem Data' || label === 'Formato Inválido')) {
+    errorDiv.innerHTML = "Nenhuma data válida encontrada para o período selecionado.";
+    return;
+  }
+
+  graficoLinha = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Faturamento Diário',
+        data: dataValues,
+        backgroundColor: 'rgba(0, 255, 255, 0.6)'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { labels: { color: "#00ffff" } },
+        title: { display: true, text: 'Faturamento Diário', color: '#00ffff' }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: "#aaa" } },
+        x: { ticks: { color: "#aaa" } }
+      }
+    }
+  });
+}
+
+function desenharGraficoFornecedores(dados) {
+  const ctx = document.getElementById("graficoFornecedores").getContext("2d");
+  const errorDiv = document.getElementById("graficoFornecedoresError");
+  if (graficoFornecedores) graficoFornecedores.destroy();
+  errorDiv.innerHTML = ""; // Limpa mensagens de erro anteriores
+
+  const fornecedores = [...new Set(dados.map(d => d.fornecedor || 'Desconhecido'))];
+  const faturamento = fornecedores.map(fornecedor =>
+    dados.filter(d => d.fornecedor === fornecedor)
+         .reduce((sum, d) => sum + parseFloat(d.faturamento || 0), 0)
+  );
+
+  // Ordenar fornecedores por faturamento e pegar os top 10
+  const top10 = fornecedores
+    .map((f, i) => ({ fornecedor: f, fat: faturamento[i] }))
+    .sort((a, b) => b.fat - a.fat)
+    .slice(0, 10);
+
+  const labels = top10.map(f => f.fornecedor);
+  const dataValues = top10.map(f => f.fat);
+
+  if (labels.length === 0 || labels.every(label => label === 'Desconhecido')) {
+    errorDiv.innerHTML = "Nenhum fornecedor válido encontrado para o período selecionado.";
+    return;
+  }
+
+  const maxFaturamento = Math.max(...dataValues);
+  const backgroundColors = labels.map((label, i) =>
+    dataValues[i] === maxFaturamento ? '#FFCE56' : ['#FF6384', '#36A2EB', '#4BC0C0', '#9966FF', '#FF9F40'][i % 5]
+  );
+
+  graficoFornecedores = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Faturamento por Fornecedor',
+        data: dataValues,
+        backgroundColor: backgroundColors
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { 
+        legend: { labels: { color: "#00ffff" } },
+        title: { display: true, text: 'Top 10 Fornecedores por Faturamento', color: '#00ffff' }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: "#aaa" } },
+        x: { ticks: { color: "#aaa" } }
+      }
+    }
+  });
+}
+
+function desenharGraficoProdutosMaisVendidos(dados) {
+  const ctx = document.getElementById("graficoProdutosMaisVendidos").getContext("2d");
+  if (graficoBarrasHorizontais) graficoBarrasHorizontais.destroy();
+
+  const produtos = [...new Set(dados.map(d => d.produto || 'Desconhecido'))];
+  const quantidade = produtos.map(produto =>
+    dados.filter(d => d.produto === produto)
+         .reduce((sum, d) => sum + parseFloat(d.quantidade_vendida || 0), 0)
+  );
+
+  const top10 = produtos
+    .map((p, i) => ({ produto: p, qtd: quantidade[i] }))
+    .sort((a, b) => b.qtd - a.qtd)
+    .slice(0, 10);
+
+  const labels = top10.map(p => p.produto);
+  const data = top10.map(p => p.qtd);
+
+  graficoBarrasHorizontais = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Quantidade Vendida',
+        data,
+        backgroundColor: 'rgba(76, 187, 23, 0.6)'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { 
+        legend: { labels: { color: "#00ffff" } },
+        title: { display: true, text: 'Top 10 Produtos Mais Vendidos', color: '#00ffff' }
+      },
+      scales: {
+        x: { beginAtZero: true, ticks: { color: "#aaa" } },
+        y: { ticks: { color: "#aaa" } }
+      }
+    }
+  });
+}
+
+function exportarCSV() {
+  const tabela = document.querySelector('#tabelaVendas');
+  let csv = [];
+  const headers = Array.from(tabela.querySelectorAll('th')).map(th => `"${th.innerText}"`);
+  csv.push(headers.join(','));
+
+  tabela.querySelectorAll('tbody tr').forEach(tr => {
+    const tds = Array.from(tr.querySelectorAll('td')).map(td => `"${td.innerText}"`);
+    csv.push(tds.join(','));
+  });
+
+  const csvString = csv.join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'analise_vendas.csv';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

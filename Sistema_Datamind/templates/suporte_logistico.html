@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Suporte Logístico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .back-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #3498db;
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #2980b9;
+        }
+
+        .tab-button.active {
+            background-color: #2ecc71;
+        }
+
+        .content {
+            padding: 20px;
+            text-align: center;
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Relatório de Suporte Logístico</h1>
+        <div class="header-buttons">
+            <button class="back-btn" onclick="voltar()">Voltar</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a href="/conferencia" class="tab-button">Conferente</a>
+        <a href="/separador" class="tab-button">Separador</a>
+        <a href="/suporte_logistico" class="tab-button active">Suporte Logístico</a>
+    </div>
+
+    <div class="content">
+        <h2>Bem-vindo à Página de Suporte Logístico</h2>
+        <p>Esta é a página inicial para o módulo de Suporte Logístico. .</p>
+    </div>
+
+    <script>
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            window.location.href = '/relatorio';
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>

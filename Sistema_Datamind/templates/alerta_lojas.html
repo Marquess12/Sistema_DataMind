@@ -1,0 +1,1229 @@
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Rupturas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-deferred@2.0.0/dist/chartjs-plugin-deferred.min.js"></script>
+    <style>
+        .waves-loader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(52, 73, 94, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .wave {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(to right, #00ffcc, #00ffc3, #00ffcc);
+            margin: 5px;
+            animation: waveAnimation 1s ease-in-out infinite;
+        }
+
+        .w1 { animation-delay: 0s; }
+        .w2 { animation-delay: 0.33s; }
+        .w3 { animation-delay: 0.66s; }
+
+        @keyframes waveAnimation {
+            0%, 100% { transform: scaleX(1); }
+            50% { transform: scaleX(1.5); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-family: 'Arial', sans-serif;
+            color: #00ffcc;
+            font-size: 18px;
+        }
+
+        .dots::after {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background-color: currentColor;
+            border-radius: 50%;
+            margin-left: 3px;
+            animation: blinkDots 1.2s steps(5, start) infinite;
+        }
+
+        @keyframes blinkDots {
+            0%, 100% { opacity: 0; }
+            25%, 75% { opacity: 1; }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h2 {
+            margin: 0;
+            display: inline-block;
+            font-size: 24px;
+        }
+
+        .header .btn-home {
+            float: right;
+            padding: 8px 15px;
+            background-color: #00cc66;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .header .btn-home:hover {
+            background-color: #00b359;
+        }
+
+        .header .btn-sair {
+            float: right;
+            padding: 8px 15px;
+            background-color: #ff4d4d;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .header .btn-sair:hover {
+            background-color: #ff3333;
+        }
+
+        .content {
+            margin-top: 60px;
+            padding-bottom: 200px;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(100, 100, 100, 0.2);
+            margin: 0 20px 20px 20px;
+        }
+
+        .form-container label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .form-container .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+            margin-right: 10px;
+        }
+
+        .form-container button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .form-container button:hover {
+            background-color: #2c3e50;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border: 1px solid #ff4d4d;
+            border-radius: 4px;
+            margin: 10px 20px;
+        }
+
+        .info-message {
+            margin: 10px 20px;
+        }
+
+        .section-title {
+            margin: 10px 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 97%;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(100, 100, 100, 0.2);
+            border-radius: 5px;
+            margin: 0 20px;
+        }
+
+        thead {
+            position: sticky;
+            top: 50px;
+            background-color: #2c3e50;
+            color: white;
+            z-index: 1;
+            width: calc(102.8% - 40px);
+            display: table;
+            margin: 0 1px;
+        }
+
+        th, td {
+            padding: 8px 5px;
+            border-bottom: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        th {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            word-break: break-word;
+        }
+
+        tr {
+            display: table;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .zero {
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
+        .cd-stock {
+            color: #00cc66;
+            font-weight: bold;
+        }
+
+        .non-zero {
+            font-weight: bold;
+            text-align: center;
+        }
+
+        th:nth-child(1), td:nth-child(1) { width: 5%; text-align: center; }
+        th:nth-child(2), td:nth-child(2) { width: 7%; text-align: center; }
+        th:nth-child(3), td:nth-child(3) { width: 35%; }
+        th:nth-child(4), td:nth-child(4) { width: 5%; }
+        th:nth-child(5), td:nth-child(5) { width: 10%; text-align: center; }
+        th:nth-child(6), td:nth-child(6) { width: 10%; text-align: center; }
+        th:nth-child(7), td:nth-child(7) { width: 8%; text-align: center; }
+        th:nth-child(8), td:nth-child(8) { width: 8%; text-align: center; }
+
+        .ver-codigos-btn {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 20px;
+            display: inline-block;
+        }
+
+        .ver-codigos-btn:hover {
+            background-color: #2c3e50;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(52, 73, 94, 0.5);
+            z-index: 999;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            z-index: 1000;
+            max-width: 80%;
+            max-height: 80%;
+            overflow: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(100, 100, 100, 0.2);
+        }
+
+        .popup-content {
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .count {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .close-btn, .copy-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .close-btn {
+            background-color: #ff4d4d;
+            color: white;
+        }
+
+        .close-btn:hover {
+            background-color: #ff3333;
+        }
+
+        .copy-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .nav-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            background-color: #f1c40f;
+            color: white;
+        }
+
+        .nav-btn:hover {
+            background-color: #d4ac0d;
+        }
+
+        .nav-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .charts-container {
+            display: flex;
+            justify-content: space-around; /* Distribute space evenly around items */
+            flex-wrap: wrap; /* Allow items to wrap to the next line if they exceed container width */
+            gap: 10px; /* Add consistent spacing between items */
+            margin: 10px 20px; /* Adjust margin to match other sections */
+            align-items: stretch; /* Ensure all items stretch to the same height */
+        }
+
+        .chart-container {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(100, 100, 100, 0.2);
+            transition: transform 0.3s ease-in-out;
+            height: 300px; /* Fixed height for all chart containers */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box; /* Ensure padding is included in width/height */
+        }
+
+        .chart-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(100, 100, 100, 0.3);
+        }
+
+        .chart-container.pizza {
+            flex: 1 1 23%; /* Allow growth and shrinkage, base width 23% */
+            max-width: 250px;
+            min-width: 200px; /* Prevent shrinking too much */
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container.bar {
+            flex: 1 1 35%; /* Slightly wider for bar chart */
+            min-width: 300px;
+            height: 300px;
+        }
+
+        .chart-container.comparacao {
+            flex: 1 1 23%;
+            max-width: 250px;
+            min-width: 200px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-container.status {
+            flex: 1 1 23%;
+            max-width: 250px;
+            min-width: 200px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-values {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .chart-values p {
+            margin: 2px 0;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .status-card-container {
+            width: 100%; /* Fill the chart-container */
+            height: 100%; /* Fill the height of the chart-container */
+            min-height: 200px;
+            max-height: 300px;
+            background-color: white;
+            border-radius: 8px;
+            /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); */
+            margin: 0; /* Remove margin to fit within chart-container */
+            padding: 25px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: stretch;
+            overflow-y: 100px;
+            border: 0px solid #e0e0e0;
+            transition: all 0.3s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .status-card-container h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-card-container p {
+            margin: 2% 0;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-card-container .total {
+            font-weight: bold;
+            margin: 10px 0;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .status-label {
+            position: relative;
+            font-weight: bold;
+        }
+
+        .status-label::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-block;
+        }
+
+        .status-label.aberto::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #f1c40f 10%, transparent 10.01%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translateY(-50%); opacity: 0.5; }
+            50% { transform: scale(1.5) translateY(-50%); opacity: 0.8; }
+            100% { transform: scale(1) translateY(-50%); opacity: 0.5; }
+        }
+
+        .status-label.acatado::before {
+            content: '✔';
+            font-size: 14px;
+            color: #e67e22;
+            opacity: 0;
+            animation: fadeInCheck 1.5s infinite;
+        }
+
+        @keyframes fadeInCheck {
+            0% { opacity: 0; transform: scale(0.5) translateY(-50%); }
+            50% { opacity: 1; transform: scale(1) translateY(-50%); }
+            100% { opacity: 0; transform: scale(0.5) translateY(-50%); }
+        }
+
+        .status-label.separando::before {
+            content: '⚙';
+            font-size: 14px;
+            color: #e74c3c;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .status-label.conf::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: rgba(52, 152, 219, 0.5);
+            border-radius: 50%;
+            animation: zoomIn 1.5s infinite;
+        }
+
+        @keyframes zoomIn {
+            0% { transform: translateY(-50%) scale(0); }
+            50% { transform: translateY(-50%) scale(1.5); }
+            100% { transform: translateY(-50%) scale(0); }
+        }
+
+        .status-label.despachado::before {
+            content: '🚚';
+            font-size: 14px;
+            color: #9b59b6;
+            transform: translateY(-50%) scaleX(-1);
+            animation: moveTruck 3s linear infinite;
+        }
+
+        @keyframes moveTruck {
+            0% { left: -20px; }
+            100% { left: 100%; }
+        }
+
+        .status-label.recebido::before {
+            content: '📦';
+            font-size: 14px;
+            color: #2ecc71;
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%); }
+            50% { transform: translateY(-70%); }
+        }
+
+        .status-label.cancelado::before {
+            content: '✖';
+            font-size: 14px;
+            color: #95a5a6;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0) translateY(-50%); }
+            25% { transform: translateX(-5px) translateY(-50%); }
+            50% { transform: translateX(5px) translateY(-50%); }
+            75% { transform: translateX(-5px) translateY(-50%); }
+            100% { transform: translateX(0) translateY(-50%); }
+        }
+
+        .status-label.em-andamento::before {
+            content: '';
+            bottom: -5px;
+            width: 10%;
+            height: 3px;
+            background: linear-gradient(to right, #f39c12, transparent);
+            animation: wave 2s infinite;
+        }
+
+        @keyframes wave {
+            0% { transform: translateX(-100%) translateY(-50%); }
+            100% { transform: translateX(100%) translateY(-50%); }
+        }
+
+        .status-label.aberto { color: #f1c40f; }
+        .status-label.acatado { color: #e67e22; }
+        .status-label.separando { color: #e74c3c; }
+        .status-label.conf { color: #3498db; }
+        .status-label.despachado { color: #9b59b6; }
+        .status-label.recebido { color: #2ecc71; }
+        .status-label.cancelado { color: #95a5a6; }
+        .status-label.em-andamento { color: #f39c12; }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px; /* Increase gap for better spacing on mobile */
+            }
+            .chart-container.pizza, .chart-container.bar, .chart-container.comparacao, .chart-container.status {
+                flex: 1 1 100%; /* Full width on mobile */
+                max-width: 100%;
+                min-width: 100%;
+                height: 300px;
+            }
+            .chart-values {
+                text-align: center;
+            }
+            .status-card-container {
+                max-width: 65%;
+            }
+        }
+.status-card-container h4 {
+    margin-top: -10px; /* Puxa o título para cima */
+}
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .chart-container.pizza, .chart-container.comparacao, .chart-container.status {
+                flex: 1 1 30%; /* Slightly wider on medium screens */
+                max-width: 220px;
+                min-width: 200px;
+            }
+            .chart-container.bar {
+                flex: 1 1 35%;
+                min-width: 280px;
+            }
+        }
+
+        .form-container {
+            margin-top: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="waves-loader">
+        <div class="wave w1"></div>
+        <div class="wave w2"></div>
+        <div class="wave w3"></div>
+        <div class="loading-text">Analisando Dados<span class="dots">...</span></div>
+    </div>
+
+    <div class="header">
+        <h2>Análise de Rupturas</h2>
+        <a href="/" class="btn-home">Home</a>
+        <a href="/logout" class="btn-sair">Sair</a>
+    </div>
+
+    <div class="form-container">
+        <form method="POST" action="/alerta_lojas" id="filterForm">
+            <div class="form-row">
+                <label for="loja">Loja:</label>
+                <input type="text" id="loja" name="loja" value="{{ loja if loja is not none else '' }}" class="form-input">
+                <label for="grupo">Grupo:</label>
+                <input type="text" id="grupo" name="grupo" value="{{ grupo if grupo is not none else '' }}" class="form-input">
+                <label for="fornecedor">Fornecedor:</label>
+                <input type="text" id="fornecedor" name="fornecedor" value="{{ fornecedor if fornecedor is not none else '' }}" class="form-input">
+                <label for="saldo_min_cd">Saldo no Depósito (mínimo):</label>
+                <input type="number" id="saldo_min_cd" name="saldo_min_cd" min="0" value="{{ saldo_min_cd | int if saldo_min_cd is not none else '' }}" class="form-input">
+                <label for="saldo_max_loja">Saldo na Loja (máximo):</label>
+                <input type="number" id="saldo_max_loja" name="saldo_max_loja" min="0" value="{{ saldo_max_loja | int if saldo_max_loja is not none else '' }}" class="form-input">
+            </div>
+            <div class="form-row">
+                <button type="submit">Filtrar</button>
+                <button type="button" onclick="window.print()">Imprimir</button>
+                <button type="button" onclick="exportToExcel()">Abrir em Excel</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="charts-container">
+            {% if dados_pizza %}
+                <div class="chart-container pizza">
+                    <canvas id="pizzaChart"></canvas>
+                    <div class="chart-values">
+                        <p>Rupturas:% {{ dados_pizza.rupturas }}</p>
+                        <p>Com Estoque:% {{ dados_pizza.com_estoque }}</p>
+                    </div>
+                    <script>
+                        const ctxPizza = document.getElementById('pizzaChart').getContext('2d');
+                        new Chart(ctxPizza, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Rupturas (%)', 'Com Estoque (%)'],
+                                datasets: [{
+                                    data: [{{ dados_pizza.rupturas }}, {{ dados_pizza.com_estoque }}],
+                                    backgroundColor: ['#FF6666', '#00CC66'],
+                                    borderColor: ['#FFFFFF'],
+                                    borderWidth: 2,
+                                    shadowOffsetX: 4,
+                                    shadowOffsetY: 4,
+                                    shadowBlur: 12,
+                                    shadowColor: 'rgba(100, 100, 100, 0.2)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: true,
+                                    duration: 1500,
+                                    easing: 'easeOutElastic',
+                                    delay: (context) => context.dataIndex * 300
+                                },
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: { color: '#2c3e50', font: { size: 14, weight: 'bold' } }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Percentual de Rupturas na Loja',
+                                        color: '#2c3e50',
+                                        font: { size: 16, weight: 'bold' }
+                                    },
+                                    datalabels: {
+                                        color: '#fff',
+                                        font: { weight: 'bold', size: 12 },
+                                        formatter: (value, ctx) => {
+                                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                            return ((value / total) * 100).toFixed(2) + '%';
+                                        }
+                                    },
+                                    deferred: { yOffset: '50%', delay: 500 }
+                                },
+                                elements: {
+                                    arc: { hoverOffset: 40, hoverBorderWidth: 4, hoverBackgroundColor: ['#ff6666', '#00e676'] }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
+                    </script>
+                </div>
+            {% endif %}
+
+            {% if total_skus_cd_com_saldo_sem_loja is defined and total_skus_cd_com_saldo_sem_loja > 0 %}
+                <div class="chart-container comparacao">
+                    <canvas id="comparacaoChart"></canvas>
+                    <div class="chart-values">
+                        <p>SKUs com Ruptura: {{ total_skus_cd_com_saldo_sem_loja }}</p>
+                        <p>SKUs com saldo no CD: {{ total_skus_cd_com_saldo - total_skus_cd_com_saldo_sem_loja }}</p>
+                    </div>
+                    <script>
+                        const ctxComparacao = document.getElementById('comparacaoChart').getContext('2d');
+                        new Chart(ctxComparacao, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['SKUs com Ruptura', 'SKUs com saldo no CD'],
+                                datasets: [{
+                                    data: [{{ total_skus_cd_com_saldo_sem_loja }}, {{ total_skus_cd_com_saldo - total_skus_cd_com_saldo_sem_loja }}],
+                                    backgroundColor: ['#FF6666', '#00CC66'],
+                                    borderColor: ['#FFFFFF'],
+                                    borderWidth: 2,
+                                    shadowOffsetX: 4,
+                                    shadowOffsetY: 4,
+                                    shadowBlur: 12,
+                                    shadowColor: 'rgba(100, 100, 100, 0.2)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: true,
+                                    duration: 1500,
+                                    easing: 'easeOutBack',
+                                    delay: (context) => context.dataIndex * 300
+                                },
+                                plugins: {
+                                    legend: { position: 'top', labels: { color: '#2c3e50', font: { size: 14, weight: 'bold' } } },
+                                    title: {
+                                        display: true,
+                                        text: 'Distribuição de SKUs (Grupo Filtrado)',
+                                        color: '#2c3e50',
+                                        font: { size: 16, weight: 'bold' }
+                                    },
+                                    datalabels: {
+                                        color: '#fff',
+                                        font: { weight: 'bold', size: 12 },
+                                        formatter: (value, ctx) => {
+                                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                            return ((value / total) * 100).toFixed(1) + '%';
+                                        }
+                                    },
+                                    deferred: { yOffset: '50%', delay: 700 }
+                                },
+                                elements: {
+                                    arc: { hoverOffset: 40, hoverBorderWidth: 4, hoverBackgroundColor: ['#ff6666', '#00e676'] }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
+                    </script>
+                </div>
+                <div class="chart-container status">
+                    <div id="statusCard" class="status-card-container">
+                        <h4 id="lojaNome">Loja: Carregando...</h4>
+                        <p class="total" id="totalPedidos">Total de Pedidos: 0</p>
+                        <p><span class="status-label em-andamento">Em Andamento:</span> <span id="statusEmAndamento">0</span></p>
+                        <p><span class="status-label aberto">Aberto:</span> <span id="statusAberto">0</span></p>                        
+                        <p><span class="status-label acatado">Acatado:</span> <span id="statusAcatado">0</span></p>
+                        <p><span class="status-label separando">Separando:</span> <span id="statusSeparando">0</span></p>
+                        <p><span class="status-label conf">Conferência:</span> <span id="statusConf">0</span></p>
+                        <p><span class="status-label despachado">Despachado:</span> <span id="statusDespachado">0</span></p>
+                        <p><span class="status-label recebido">Recebido:</span> <span id="statusRecebido">0</span></p>
+                        <p><span class="status-label cancelado">Cancelado:</span> <span id="statusCancelado">0</span></p>
+                        
+                    </div>
+                    <script>
+                        function fetchPedidosData() {
+                            const loja = document.getElementById('loja').value.trim();
+                            const grupo = document.getElementById('grupo').value.trim();
+                            console.log("fetchPedidosData called with loja:", loja, "grupo:", grupo);
+
+                            if (!loja) {
+                                console.log("Loja não informada, ignorando busca de pedidos.");
+                                return;
+                            }
+
+                            showLoader();
+                            fetch(`/dados_pedidos?loja=${encodeURIComponent(loja)}&grupo=${encodeURIComponent(grupo)}`)
+                                .then(response => {
+                                    console.log("Fetch response status:", response.status);
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    console.log("Dados recebidos:", data);
+                                    if (data.erro) {
+                                        console.error("Erro ao buscar dados de pedidos:", data.erro);
+                                        hideLoader();
+                                        return;
+                                    }
+
+                                    const pedidosPorStatus = data.pedidos_por_status;
+                                    const nomeFilial = data.nome_filial || "Desconhecida";
+                                    console.log("Pedidos por status:", pedidosPorStatus);
+
+                                    const lojaNomeElement = document.getElementById('lojaNome');
+                                    const totalPedidosElement = document.getElementById('totalPedidos');
+                                    const statusAbertoElement = document.getElementById('statusAberto');
+                                    const statusAcatadoElement = document.getElementById('statusAcatado');
+                                    const statusSeparandoElement = document.getElementById('statusSeparando');
+                                    const statusConfElement = document.getElementById('statusConf');
+                                    const statusDespachadoElement = document.getElementById('statusDespachado');
+                                    const statusRecebidoElement = document.getElementById('statusRecebido');
+                                    const statusCanceladoElement = document.getElementById('statusCancelado');
+                                    const statusEmAndamentoElement = document.getElementById('statusEmAndamento');
+
+                                    if (!lojaNomeElement || !totalPedidosElement || !statusAbertoElement || !statusAcatadoElement ||
+                                        !statusSeparandoElement || !statusConfElement || !statusDespachadoElement || !statusRecebidoElement ||
+                                        !statusCanceladoElement || !statusEmAndamentoElement) {
+                                        console.error("One or more DOM elements not found!");
+                                        hideLoader();
+                                        return;
+                                    }
+
+                                    lojaNomeElement.textContent = `Loja: ${loja} - ${nomeFilial}`;
+                                    const totalPedidos = Object.values(pedidosPorStatus).reduce((sum, qty) => sum + (qty || 0), 0);
+                                    totalPedidosElement.textContent = `Total de Pedidos: ${totalPedidos}`;
+                                    statusAbertoElement.textContent = pedidosPorStatus[0] || 0;
+                                    statusAcatadoElement.textContent = pedidosPorStatus[1] || 0;
+                                    statusSeparandoElement.textContent = pedidosPorStatus[2] || 0;
+                                    statusConfElement.textContent = pedidosPorStatus[3] || 0;
+                                    statusDespachadoElement.textContent = pedidosPorStatus[4] || 0;
+                                    statusRecebidoElement.textContent = pedidosPorStatus[5] || 0;
+                                    statusCanceladoElement.textContent = pedidosPorStatus[6] || 0;
+                                    statusEmAndamentoElement.textContent = pedidosPorStatus[8] || 0;
+
+                                    console.log("DOM updated successfully");
+                                    hideLoader();
+                                })
+                                .catch(error => {
+                                    console.error("Erro ao buscar dados de pedidos:", error);
+                                    hideLoader();
+                                });
+                        }
+
+                        document.getElementById('filterForm').addEventListener('submit', function(event) {
+                            const loja = document.getElementById('loja').value.trim();
+                            if (loja === '') {
+                                alert("Por favor, preencha o campo Loja.");
+                                event.preventDefault();
+                                return;
+                            }
+                            showLoader();
+                            fetchPedidosData();
+                            event.preventDefault();
+                        });
+
+                        window.addEventListener('load', function() {
+                            hideLoader();
+                            if (document.getElementById('loja').value.trim()) {
+                                fetchPedidosData();
+                            }
+                        });
+                    </script>
+                </div>
+            {% endif %}
+
+            {% if dados_ranking %}
+                <div class="chart-container bar">
+                    <canvas id="barChart"></canvas>
+                    <script>
+                        function darkenColor(hex, percent) {
+                            hex = hex.replace('#', '');
+                            const r = parseInt(hex.substr(0, 2), 16);
+                            const g = parseInt(hex.substr(2, 2), 16);
+                            const b = parseInt(hex.substr(4, 2), 16);
+                            const factor = 1 - (percent / 100);
+                            return `#${Math.round(r * factor).toString(16).padStart(2, '0')}${Math.round(g * factor).toString(16).padStart(2, '0')}${Math.round(b * factor).toString(16).padStart(2, '0')}`;
+                        }
+
+                        const ctxBar = document.getElementById('barChart').getContext('2d');
+                        const rupturasData = {{ rupturas | tojson }};
+                        const maxRupturas = Math.max(...rupturasData);
+                        const yMax = maxRupturas * 1.3;
+
+                        const barColors = [
+                            '#ff4d4d', '#3498db', '#00cc66', '#f1c40f', '#9b59b6',
+                            '#e67e22', '#1abc9c', '#34495e', '#ff6666', '#00e676'
+                        ];
+
+                        new Chart(ctxBar, {
+                            type: 'bar',
+                            data: {
+                                labels: {{ fornecedores | tojson }},
+                                datasets: [{
+                                    label: 'Rupturas por Fornecedor',
+                                    data: {{ rupturas | tojson }},
+                                    backgroundColor: barColors.slice(0, {{ fornecedores | length }}),
+                                    borderColor: ['#FFFFFF'],
+                                    borderWidth: 2,
+                                    borderRadius: 8,
+                                    shadowOffsetX: 4,
+                                    shadowOffsetY: 4,
+                                    shadowBlur: 12,
+                                    shadowColor: 'rgba(100, 100, 100, 0.2)'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                animation: {
+                                    duration: 1500,
+                                    easing: 'easeOutQuart',
+                                    delay: (context) => context.dataIndex * 100,
+                                    y: { type: 'number', easing: 'easeOutBounce', from: ctx => ctx.chart.scales.y.getPixelForValue(0) }
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    title: {
+                                        display: true,
+                                        text: 'Ranking de Rupturas por Fornecedor (Top 10)',
+                                        color: '#2c3e50',
+                                        font: { size: 16, weight: 'bold' }
+                                    },
+                                    tooltip: { callbacks: { label: function(context) { return `Rupturas: ${context.raw}`; } } },
+                                    datalabels: {
+                                        anchor: 'end',
+                                        align: 'top',
+                                        color: '#2c3e50',
+                                        font: { weight: 'bold', size: 12 },
+                                        formatter: function(value) { return value; }
+                                    },
+                                    deferred: { yOffset: '50%', delay: 900 }
+                                },
+                                scales: {
+                                    y: { beginAtZero: true, suggestedMax: yMax, title: { display: true, text: 'Número de Rupturas', color: '#2c3e50', font: { size: 14 } }, ticks: { color: '#2c3e50' } },
+                                    x: { title: { display: true, text: 'Fornecedor', color: '#2c3e50', font: { size: 14 } }, ticks: { color: '#2c3e50' } }
+                                },
+                                elements: {
+                                    bar: { hoverBackgroundColor: barColors.slice(0, {{ fornecedores | length }}).map(color => darkenColor(color, 20)), hoverBorderWidth: 3, transitionDuration: 0.2 }
+                                }
+                            },
+                            plugins: [ChartDataLabels]
+                        });
+                    </script>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if erro %}
+            <p class="error-message">{{ erro }}</p>
+        {% endif %}
+
+        {% if produtos %}
+            <h3 class="section-title">Produtos com saldo no CD e na Loja:</h3>
+            <button type="button" class="ver-codigos-btn" onclick="mostrarCodigos()">Ver Códigos</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Grupo</th>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Fornecedor</th>
+                        <th>Estoque no CD</th>
+                        <th>Estoque na Loja</th>
+                        <th>Preço</th>
+                        <th>Custo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fornecedor, produtos_fornecedor in produtos | groupby('fornecedor') | sort %}
+                        {% for produto in produtos_fornecedor %}
+                            {% if produto.estoque_loja is defined and produto.estoque_cd is defined %}
+                                {% set estoque_loja = (produto.estoque_loja | float | default(0)) %}
+                                {% set estoque_cd = (produto.estoque_cd | float | default(0)) %}
+                                <tr>
+                                    <td>{{ produto.grupo }}</td>
+                                    <td class="codigo-produto">{{ produto.codigo }}</td>
+                                    <td>{{ produto.descricao }}</td>
+                                    <td>{{ produto.fornecedor }}</td>
+                                    <td class="cd-stock">
+                                        {{ estoque_cd | int if estoque_cd | int == estoque_cd else estoque_cd | float | round(2) }}
+                                    </td>
+                                    <td class="{% if estoque_loja == 0 %}zero{% else %}non-zero{% endif %}">
+                                        {{ estoque_loja | int if estoque_loja | int == estoque_loja else estoque_loja | float | round(2) }}
+                                    </td>
+                                    <td>R$ {{ produto.preco | float | round(2) }}</td>
+                                    <td>R$ {{ produto.custo | float | round(2) }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="info-message"></p>
+        {% endif %}
+
+        <div class="overlay" id="overlay"></div>
+        <div class="popup" id="popupCodigos">
+            <div class="count" id="skuCount"></div>
+            <div class="popup-content" id="listaCodigos"></div>
+            <button class="copy-btn" onclick="copiarCodigos()">Copiar Códigos</button>
+            <button class="nav-btn" id="prevBtn" onclick="mostrarGrupoAnterior()" disabled>Anterior</button>
+            <button class="nav-btn" id="nextBtn" onclick="mostrarProximoGrupo()">Próximo</button>
+            <button class="close-btn" onclick="fecharPopup()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        function showLoader() {
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        let gruposCodigos = [];
+        let grupoAtual = 0;
+        const codigosPorGrupo = 30;
+        let autoFilterInterval = null;
+        let hasValidSubmission = false;
+        let initialLoja = '';
+        let initialGrupo = '';
+        let initialFornecedor = '';
+
+        function dividirCodigosEmGrupos(codigos) {
+            const grupos = [];
+            for (let i = 0; i < codigos.length; i += codigosPorGrupo) {
+                grupos.push(codigos.slice(i, i + codigosPorGrupo));
+            }
+            return grupos;
+        }
+
+        function mostrarCodigos() {
+            const codigos = Array.from(document.querySelectorAll('.codigo-produto'))
+                .map(cell => cell.textContent.trim());
+            
+            if (codigos.length === 0) {
+                alert("Nenhum código encontrado.");
+                return;
+            }
+
+            gruposCodigos = dividirCodigosEmGrupos(codigos);
+            grupoAtual = 0;
+            mostrarGrupoAtual();
+        }
+
+        function mostrarGrupoAtual() {
+            const codigosTexto = gruposCodigos[grupoAtual].join(", ");
+            document.getElementById('listaCodigos').textContent = codigosTexto;
+            document.getElementById('skuCount').textContent = `Grupo ${grupoAtual + 1} de ${gruposCodigos.length} (${gruposCodigos[grupoAtual].length} SKUs)`;
+            document.getElementById('prevBtn').disabled = grupoAtual === 0;
+            document.getElementById('nextBtn').disabled = grupoAtual === gruposCodigos.length - 1;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popupCodigos').style.display = 'block';
+        }
+
+        function mostrarProximoGrupo() {
+            if (grupoAtual < gruposCodigos.length - 1) {
+                grupoAtual++;
+                mostrarGrupoAtual();
+            }
+        }
+
+        function mostrarGrupoAnterior() {
+            if (grupoAtual > 0) {
+                grupoAtual--;
+                mostrarGrupoAtual();
+            }
+        }
+
+        function fecharPopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popupCodigos').style.display = 'none';
+            gruposCodigos = [];
+            grupoAtual = 0;
+        }
+
+        function copiarCodigos() {
+            const codigosTexto = document.getElementById('listaCodigos').textContent;
+            const textarea = document.createElement('textarea');
+            textarea.value = codigosTexto;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert("Códigos copiados para a área de transferência! (Use Ctrl+C se necessário)");
+            } catch (err) {
+                console.error("Erro ao copiar automaticamente: ", err);
+                alert("Falha na cópia automática. Por favor, use Ctrl+C após selecionar o texto.");
+            } finally {
+                document.body.removeChild(textarea);
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(codigosTexto).then(() => {
+                    alert("Códigos copiados com sucesso!");
+                }).catch(err => {
+                    console.error("Erro com navigator.clipboard: ", err);
+                });
+            }
+        }
+
+        function exportToExcel() {
+            const table = document.querySelector('table');
+            if (!table) {
+                alert("Nenhuma tabela encontrada para exportar.");
+                return;
+            }
+
+            const worksheet = XLSX.utils.table_to_sheet(table);
+            const headerRow = worksheet['!ref'].split(':')[0];
+            for (const cell in worksheet) {
+                if (cell.startsWith(headerRow)) {
+                    worksheet[cell].s = { font: { bold: true } };
+                }
+            }
+
+            const range = XLSX.utils.decode_range(worksheet['!ref']);
+            for (let row = range.s.r + 1; row <= range.e.r; row++) {
+                const cellPreco = XLSX.utils.encode_cell({ c: 6, r: row });
+                if (worksheet[cellPreco]) {
+                    worksheet[cellPreco].s = { alignment: { horizontal: "right" }, numFmt: "@" };
+                }
+                const cellCusto = XLSX.utils.encode_cell({ c: 7, r: row });
+                if (worksheet[cellCusto]) {
+                    worksheet[cellCusto].s = { alignment: { horizontal: "right" }, numFmt: "@" };
+                }
+            }
+
+            const columnWidths = [
+                { wch: 10 }, { wch: 15 }, { wch: 50 }, { wch: 20 },
+                { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 10 }
+            ];
+
+            worksheet['!cols'] = columnWidths;
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Produtos");
+            XLSX.writeFile(workbook, 'produtos_zerados.xlsx');
+        }
+
+        document.getElementById('overlay').addEventListener('click', fecharPopup);
+
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+            const loja = document.getElementById('loja').value.trim();
+            const grupo = document.getElementById('grupo').value.trim();
+            const fornecedor = document.getElementById('fornecedor').value.trim();
+
+            if (loja === '') {
+                alert("Por favor, preencha o campo Loja.");
+                event.preventDefault();
+                return;
+            }
+
+            console.log("Submissão manual às", new Date().toLocaleTimeString(), "com Loja:", loja, "Grupo:", grupo, "Fornecedor:", fornecedor);
+            if (!hasValidSubmission) {
+                hasValidSubmission = true;
+                initialLoja = loja;
+                initialGrupo = grupo;
+                initialFornecedor = fornecedor;
+                if (autoFilterInterval) {
+                    clearInterval(autoFilterInterval);
+                    console.log("Intervalo anterior limpo às", new Date().toLocaleTimeString());
+                }
+                autoFilter();
+                autoFilterInterval = setInterval(autoFilter, 60000);
+                console.log("Filtro automático iniciado. Próxima execução em 1 minuto às", new Date(new Date().getTime() + 60000).toLocaleTimeString());
+            }
+        });
+
+        function autoFilter() {
+            console.log("Verificando autoFilter - initialLoja:", initialLoja, "initialGrupo:", initialGrupo, "initialFornecedor:", initialFornecedor, "hasValidSubmission:", hasValidSubmission);
+            if (hasValidSubmission && initialLoja !== '') {
+                console.log("Filtro automático disparado às", new Date().toLocaleTimeString());
+                document.getElementById('filterForm').submit();
+            }
+        }
+
+        window.onload = function() {
+            console.log("Página carregada às", new Date().toLocaleTimeString());
+            hideLoader();
+        };
+    </script>
+</body>
+</html>

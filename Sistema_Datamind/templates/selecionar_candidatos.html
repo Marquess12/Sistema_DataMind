@@ -1,0 +1,1005 @@
+<!-- <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Candidatos - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        /* Estilo do cabeçalho */
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn, .btn-analise {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-analise {
+            background-color: #3498db;
+        }
+
+        .btn-analise:hover {
+            background-color: #2980b9;
+        }
+
+        /* Estilo do container principal */
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Estilo da seção de seleção */
+        .selecao-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .etapa-info {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #34495e;
+        }
+
+        /* Estilo da tabela de candidatos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tr.cursor-pointer:hover {
+            cursor: pointer;
+        }
+
+        .candidate-name {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .candidate-name:hover {
+            color: #2980b9;
+        }
+
+        .btn-avancar, .btn-reprovar {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-avancar {
+            background-color: #2ecc71;
+        }
+
+        .btn-avancar:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-reprovar {
+            background-color: #e74c3c;
+        }
+
+        .btn-reprovar:hover {
+            background-color: #c0392b;
+        }
+
+        /* Estilo do popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 700px;
+            max-width: 90%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .popup-close:hover {
+            color: #34495e;
+        }
+
+        .popup h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* Estilo da barra de progresso no popup */
+        .progress-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .progress-circle {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 2px solid #bdc3c7;
+            color: #bdc3c7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .progress-circle.active {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .progress-label {
+            margin-top: 5px;
+            font-size: 12px;
+            text-align: center;
+            color: #7f8c8d;
+            max-width: 100px;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 14px;
+            left: 0;
+            height: 2px;
+            background-color: #bdc3c7;
+            z-index: 0;
+            width: 100%;
+        }
+
+        .progress-line-filled {
+            position: absolute;
+            top: 14px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(to right, #1abc9c, #3498db);
+            z-index: 0;
+            transition: width 0.3s ease;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Selecionar Candidatos</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="btn-analise" onclick="window.location.href='/cv_analise'">Análise de Currículos</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="selecao-section">
+            <h2>Selecionar Candidatos</h2>
+            <div class="etapa-info">
+                <p>Etapa Atual: {{ etapa_atual }}</p>
+            </div>
+
+            {% if vagas %}
+                {% for vaga in vagas %}
+                    <h3>{{ vaga.titulo }}</h3>
+                    {% if vaga.candidatos %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Etapa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidato in vaga.candidatos %}
+                                    <tr class="cursor-pointer" data-candidato-id="{{ candidato.id }}" data-candidato-etapa="{{ candidato.etapa }}">
+                                        <td><span class="candidate-name" onclick="showPopup({{ candidato.id }}, {{ candidato.etapa }})">{{ candidato.nome }}</span></td>
+                                        <td>{{ candidato.etapa }}</td>
+                                        <td>{{ candidato.status }}</td>
+                                        <td>
+                                            <button class="btn-avancar" onclick="avancarEtapa({{ candidato.id }})">Avançar Etapa</button>
+                                            <button class="btn-reprovar" onclick="reprovarCandidato({{ candidato.id }})">Reprovar</button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Nenhum candidato aprovado para esta vaga.</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma vaga encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    
+    <div class="popup" id="progressPopup">
+        <div class="popup-content">
+            <span class="popup-close" onclick="closePopup()">×</span>
+            <h3>Jornada do Processo Seletivo - <span id="candidateName"></span></h3>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-line"></div>
+                <div class="progress-line-filled" id="progressLineFilled"></div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="1">1</div>
+                    <div class="progress-label">Envio de Currículo</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="2">2</div>
+                    <div class="progress-label">Triagem</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="3">3</div>
+                    <div class="progress-label">Teste Seus Conhecimentos</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="4">4</div>
+                    <div class="progress-label">Entrevista com RH</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="5">5</div>
+                    <div class="progress-label">Proposta</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="6">6</div>
+                    <div class="progress-label">Final</div>
+                </div>
+            </div>
+            <div class="popup-buttons">
+                <button class="btn-avancar" id="popupAvancarBtn" onclick="avancarEtapaFromPopup()">Avançar</button>
+                <button class="btn-reprovar" onclick="reprovarCandidatoFromPopup()">Reprovar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCandidatoId = null;
+
+        function showPopup(candidatoId, etapa) {
+            currentCandidatoId = candidatoId;
+            const popup = document.getElementById('progressPopup');
+            const candidateNameSpan = document.getElementById('candidateName');
+            const progressCircles = document.querySelectorAll('.progress-circle');
+            const progressLineFilled = document.getElementById('progressLineFilled');
+            const avancarBtn = document.getElementById('popupAvancarBtn');
+
+            // Buscar o nome do candidato na tabela
+            const candidateRow = document.querySelector(`tr[data-candidato-id="${candidatoId}"]`);
+            const candidateName = candidateRow.querySelector('.candidate-name').textContent;
+            candidateNameSpan.textContent = candidateName;
+
+            // Atualizar a barra de progresso
+            progressCircles.forEach(circle => {
+                const step = parseInt(circle.getAttribute('data-step'));
+                if (step <= etapa) {
+                    circle.classList.add('active');
+                } else {
+                    circle.classList.remove('active');
+                }
+            });
+
+            // Ajustar a linha de progresso preenchida
+            const totalSteps = 6;
+            const progressWidth = ((etapa - 1) / (totalSteps - 1)) * 100;
+            progressLineFilled.style.width = `${progressWidth}%`;
+
+            // Desabilitar o botão "Avançar" se estiver na última etapa
+            avancarBtn.disabled = etapa >= totalSteps;
+
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('progressPopup');
+            popup.style.display = 'none';
+            currentCandidatoId = null;
+        }
+
+        function avancarEtapa(candidatoId) {
+            console.log(`Avançando etapa do candidato ID: ${candidatoId}`);
+            fetch(`/avancar_etapa/${candidatoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Erro ao avançar etapa: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert('Etapa avançada com sucesso!');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert(`Erro ao avançar etapa: ${err.message}`);
+            });
+        }
+
+        function avancarEtapaFromPopup() {
+            if (currentCandidatoId) {
+                avancarEtapa(currentCandidatoId);
+            }
+        }
+
+        function reprovarCandidato(candidatoId) {
+            console.log(`Reprovando candidato ID: ${candidatoId}`);
+            fetch(`/reprovar_candidato/${candidatoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Erro ao reprovar candidato: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert('Candidato reprovado com sucesso!');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert(`Erro ao reprovar candidato: ${err.message}`);
+            });
+        }
+
+        function reprovarCandidatoFromPopup() {
+            if (currentCandidatoId) {
+                reprovarCandidato(currentCandidatoId);
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            history.back();
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selecionar Candidatos - Sistema de Gestão de Estoque</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-voltar, .logout-btn, .btn-analise {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-voltar {
+            background-color: #1abc9c;
+        }
+
+        .btn-voltar:hover {
+            background-color: #16a085;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-analise {
+            background-color: #3498db;
+        }
+
+        .btn-analise:hover {
+            background-color: #2980b9;
+        }
+
+        .container {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .selecao-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .etapa-info {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #34495e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        tr.cursor-pointer:hover {
+            cursor: pointer;
+        }
+
+        .candidate-name {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .candidate-name:hover {
+            color: #2980b9;
+        }
+
+        .btn-avancar, .btn-reprovar {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            color: white;
+        }
+
+        .btn-avancar {
+            background-color: #2ecc71;
+        }
+
+        .btn-avancar:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-reprovar {
+            background-color: #e74c3c;
+        }
+
+        .btn-reprovar:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-gerar-formulario {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            color: white;
+            background-color: #f39c12;
+            margin-right: 5px;
+        }
+
+        .btn-gerar-formulario:hover {
+            background-color: #e67e22;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .popup-close:hover {
+            color: #34495e;
+        }
+
+        .popup h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .progress-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .progress-circle {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border: 2px solid #bdc3c7;
+            color: #bdc3c7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            transition: border-color 0.3s ease, color 0.3s ease;
+        }
+
+        .progress-circle.active {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .progress-label {
+            margin-top: 5px;
+            font-size: 12px;
+            text-align: center;
+            color: #7f8c8d;
+            max-width: 100px;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 14px;
+            left: 0;
+            height: 2px;
+            background-color: #bdc3c7;
+            z-index: 0;
+            width: 100%;
+        }
+
+        .progress-line-filled {
+            position: absolute;
+            top: 14px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(to right, #1abc9c, #3498db);
+            z-index: 0;
+            transition: width 0.3s ease;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Selecionar Candidatos</h1>
+        <div class="header-buttons">
+            <button class="btn-voltar" onclick="voltar()">Voltar</button>
+            <button class="btn-analise" onclick="window.location.href='/cv_analise'">Análise de Currículos</button>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="selecao-section">
+            <h2>Selecionar Candidatos</h2>
+            <div class="etapa-info">
+                <p>Etapa Atual: {{ etapa_atual }}</p>
+            </div>
+
+            {% if vagas %}
+                {% for vaga in vagas %}
+                    <h3>{{ vaga.titulo }}</h3>
+                    {% if vaga.candidatos %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Etapa</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidato in vaga.candidatos %}
+                                    <tr class="cursor-pointer" data-candidato-id="{{ candidato.id }}" data-candidato-etapa="{{ candidato.etapa }}">
+                                        <td><span class="candidate-name" onclick="showPopup({{ candidato.id }}, {{ candidato.etapa }})">{{ candidato.nome }}</span></td>
+                                        <td>{{ candidato.etapa }}</td>
+                                        <td>{{ candidato.status }}</td>
+                                        <td>
+                                            <button class="btn-avancar" onclick="avancarEtapa({{ candidato.id }})">Avançar Etapa</button>
+                                            <button class="btn-reprovar" onclick="reprovarCandidato({{ candidato.id }})">Reprovar</button>
+                                            {% if candidato.etapa == 3 %}
+                                                <a href="/gerar_questionario/{{ candidato.id }}" class="btn-gerar-formulario">Gerar Formulário</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>Nenhum candidato aprovado para esta vaga.</p>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma vaga encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="popup" id="progressPopup">
+        <div class="popup-content">
+            <span class="popup-close" onclick="closePopup()">×</span>
+            <h3>Jornada do Processo Seletivo - <span id="candidateName"></span></h3>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-line"></div>
+                <div class="progress-line-filled" id="progressLineFilled"></div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="1">1</div>
+                    <div class="progress-label">Envio de Currículo</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="2">2</div>
+                    <div class="progress-label">Triagem</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="3">3</div>
+                    <div class="progress-label">Teste Seus Conhecimentos</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="4">4</div>
+                    <div class="progress-label">Entrevista com RH</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="5">5</div>
+                    <div class="progress-label">Proposta</div>
+                </div>
+                <div class="progress-step">
+                    <div class="progress-circle" data-step="6">6</div>
+                    <div class="progress-label">Final</div>
+                </div>
+            </div>
+            <div class="popup-buttons">
+                <button class="btn-avancar" id="popupAvancarBtn" onclick="avancarEtapaFromPopup()">Avançar</button>
+                <button class="btn-reprovar" onclick="reprovarCandidatoFromPopup()">Reprovar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCandidatoId = null;
+        let currentEtapa = null;
+
+        function showPopup(candidatoId, etapa) {
+            currentCandidatoId = candidatoId;
+            currentEtapa = etapa;
+            const popup = document.getElementById('progressPopup');
+            const candidateNameSpan = document.getElementById('candidateName');
+            const progressCircles = document.querySelectorAll('.progress-circle');
+            const progressLineFilled = document.getElementById('progressLineFilled');
+            const avancarBtn = document.getElementById('popupAvancarBtn');
+
+            const candidateRow = document.querySelector(`tr[data-candidato-id="${candidatoId}"]`);
+            const candidateName = candidateRow.querySelector('.candidate-name').textContent;
+            candidateNameSpan.textContent = candidateName;
+
+            progressCircles.forEach(circle => {
+                const step = parseInt(circle.getAttribute('data-step'));
+                if (step <= etapa) {
+                    circle.classList.add('active');
+                } else {
+                    circle.classList.remove('active');
+                }
+            });
+
+            const totalSteps = 6;
+            const progressWidth = ((etapa - 1) / (totalSteps - 1)) * 100;
+            progressLineFilled.style.width = `${progressWidth}%`;
+
+            avancarBtn.disabled = etapa >= totalSteps;
+
+            popup.style.display = 'flex';
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('progressPopup');
+            popup.style.display = 'none';
+            currentCandidatoId = null;
+        }
+
+        function avancarEtapa(candidatoId) {
+            console.log(`Avançando etapa do candidato ID: ${candidatoId}`);
+            fetch(`/avancar_etapa/${candidatoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Erro ao avançar etapa: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert('Etapa avançada com sucesso!');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert(`Erro ao avançar etapa: ${err.message}`);
+            });
+        }
+
+        function avancarEtapaFromPopup() {
+            if (currentCandidatoId) {
+                avancarEtapa(currentCandidatoId);
+            }
+        }
+
+        function reprovarCandidato(candidatoId) {
+            console.log(`Reprovando candidato ID: ${candidatoId}`);
+            fetch(`/reprovar_candidato/${candidatoId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(`Erro ao reprovar candidato: ${text}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                alert('Candidato reprovado com sucesso!');
+                location.reload();
+            })
+            .catch(err => {
+                console.error('Erro:', err);
+                alert(`Erro ao reprovar candidato: ${err.message}`);
+            });
+        }
+
+        function reprovarCandidatoFromPopup() {
+            if (currentCandidatoId) {
+                reprovarCandidato(currentCandidatoId);
+            }
+        }
+
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            history.back();
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                const progressPopup = document.getElementById('progressPopup');
+                if (progressPopup && progressPopup.style.display === 'flex') {
+                    closePopup();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

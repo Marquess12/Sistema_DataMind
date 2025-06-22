@@ -1,0 +1,246 @@
+<!-- 
+
+ -->
+ <!DOCTYPE html>
+ <html lang="pt-BR">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Relatório de Ajustes</title>
+     <style>
+         * {
+             margin: 0;
+             padding: 0;
+             box-sizing: border-box;
+             font-family: Arial, sans-serif;
+         }
+ 
+         body {
+             background-color: #f4f4f4;
+         }
+ 
+
+         .header .btn-home {
+            float: right;
+            padding: 8px 15px;
+            background-color: #27ae60;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .header .btn-home:hover {
+            background-color: #219653;
+        }
+        
+         /* Estilo do cabeçalho */
+         .header {
+             background-color: #34495e;
+             color: white;
+             padding: 15px 20px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             position: fixed;
+             top: 0;
+             width: 100%;
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+             z-index: 1000;
+         }
+ 
+         .header h1 {
+             font-size: 24px;
+         }
+ 
+         .header-buttons {
+             display: flex;
+             gap: 10px;
+         }
+ 
+         .btn-voltar, .logout-btn {
+             padding: 8px 15px;
+             border: none;
+             border-radius: 4px;
+             font-size: 14px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+         }
+ 
+         .btn-voltar {
+             background-color: #1abc9c;
+             color: white;
+         }
+ 
+         .btn-voltar:hover {
+             background-color: #16a085;
+         }
+ 
+         .logout-btn {
+             background-color: #e74c3c;
+             color: white;
+         }
+ 
+         .logout-btn:hover {
+             background-color: #c0392b;
+         }
+ 
+         /* Estilo do container principal */
+         .container {
+             margin-top: 80px;
+             padding: 20px;
+             max-width: 1200px;
+             margin-left: auto;
+             margin-right: auto;
+         }
+ 
+         h2 {
+             color: #333;
+             margin-bottom: 15px;
+         }
+ 
+         /* Estilo da seção de filtros */
+         .filtro-section {
+             background-color: white;
+             padding: 20px;
+             border-radius: 5px;
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+             margin-bottom: 20px;
+             display: flex;
+             gap: 15px;
+             flex-wrap: wrap;
+         }
+ 
+         .filtro-section label {
+             font-size: 14px;
+             margin-right: 5px;
+         }
+ 
+         .filtro-section input {
+             padding: 8px;
+             border: 1px solid #ddd;
+             border-radius: 4px;
+             font-size: 14px;
+         }
+ 
+         .filtro-section button {
+             padding: 8px 15px;
+             background-color: #3498db;
+             color: white;
+             border: none;
+             border-radius: 4px;
+             cursor: pointer;
+             transition: background-color 0.3s ease;
+         }
+ 
+         .filtro-section button:hover {
+             background-color: #2980b9;
+         }
+ 
+         /* Estilo da tabela do relatório */
+         table {
+             width: 100%;
+             border-collapse: collapse;
+             background-color: white;
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+         }
+ 
+         th, td {
+             padding: 12px;
+             text-align: left;
+             border-bottom: 1px solid #ddd;
+         }
+ 
+         th {
+             background-color: #34495e;
+             color: white;
+         }
+ 
+         tr:hover {
+             background-color: #f5f5f5;
+         }
+ 
+         .ajuste-icon {
+             display: inline-block;
+             width: 20px;
+             height: 20px;
+             border-radius: 50%;
+             color: white;
+             font-size: 12px;
+             text-align: center;
+             line-height: 20px;
+             margin-right: 5px;
+         }
+
+         
+ 
+         .ajuste-icon.positive {
+             background-color: #1abc9c;
+         }
+ 
+         .ajuste-icon.negative {
+             background-color: #e74c3c;
+         }
+     </style>
+ </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Relatório de Ajustes</h1>
+        <div class="header-buttons">
+            <a href="/" class="btn-home">Home</a>
+            <button class="logout-btn" onclick="logout()">Sair</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filtro-section">
+            <label>Data Início:</label>
+            <input type="date" id="dataInicio">
+            <label>Data Fim:</label>
+            <input type="date" id="dataFim">
+            <label>Matrícula:</label>
+            <input type="text" id="matricula" placeholder="Matrícula do Usuário">
+            <!-- Adicionar o campo abaixo -->
+            <label>Número do Ajuste:</label>
+            <input type="text" id="numeroAjuste" placeholder="Número do Ajuste">
+            <button onclick="buscarRelatorio()">Filtrar</button>
+            <button onclick="imprimirRelatorio()">Imprimir</button>
+            <button onclick="exportarExcel()">Abrir em Excel</button>
+        </div>
+
+        <h2>Relatório de Ajustes</h2>
+        <table id="relatorioTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Número do Ajuste</th>
+                    <th>Código do Produto</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
+                    <th>Custo (R$)</th>
+                    <th>Data/Hora</th>
+                    <th>Matrícula</th>
+                    <th>Nome do Usuário</th>
+                </tr>
+            </thead>
+            <tbody id="relatorioBody"></tbody>
+        </table>
+    </div>
+
+    <script src="/static/relatorio.js"></script>
+    <script>
+        function voltar() {
+            console.log("Botão Voltar clicado.");
+            window.location.href = '/';
+        }
+
+        function logout() {
+            console.log("Executando logout...");
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html> 
+

@@ -1,0 +1,138 @@
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Romaneio - PDA</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 350px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+
+    select {
+      appearance: none;
+      background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iNyIgdmlld0JveD0iMCAwIDEyIDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=") no-repeat right 10px center;
+      background-size: 12px;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      background-color: #0051ff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    button:hover, button:focus {
+      background-color: #102dd4;
+      outline: none;
+    }
+
+    /* Ajustes para responsividade em telas pequenas */
+    @media (max-width: 400px) {
+      .container {
+        padding: 10px;
+      }
+      h1 {
+        font-size: 18px;
+        margin-bottom: 10px;
+      }
+      label {
+        font-size: 14px;
+      }
+      input, select {
+        padding: 10px;
+        font-size: 14px;
+      }
+      button {
+        padding: 12px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Iniciar Romaneio</h1>
+    <form action="{{ url_for('processar_romaneio') }}" method="post">
+      <label for="motorista_id">Matrícula do Motorista:</label>
+      <input type="text" name="motorista_id" id="motorista_id" required placeholder="Ex: 2">
+
+      <label for="filial_id1">Filial:</label>
+      <select name="filial_id1" id="filial_id1" required>
+        <option value="">Selecione...</option>
+        <option value="1">PONTA NEGRA</option>
+        <option value="2">ALECRIM</option>
+        <option value="7">SAC - CENTRO VI</option>
+        <option value="100">LAGOA NOVA</option>
+        <option value="121">NORTE SHOPPING</option>
+        <option value="122">PARNAMIRIM</option>
+        <option value="131">ZN2</option>
+        <option value="137">MACAIBA</option>
+        <option value="140">MARIA LACERDA</option>
+        <option value="141">IGAPÓ</option>
+      </select>
+
+      <label for="placa_caminhao">Placa do Caminhão:</label>
+      <input type="text" name="placa_caminhao" id="placa_caminhao" maxlength="7" required placeholder="Ex: ABC1234">
+
+      <button type="submit">Iniciar Romaneio</button>
+    </form>
+  </div>
+</body>
+</html>

@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultas Avançadas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.4;
+            padding: 20px;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            font-size: 1.2rem;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .filters {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .filter-container {
+            flex: 1;
+            padding: 15px;
+            min-width: 250px;
+        }
+        .filter-container-1 {
+            border-right: 1px solid #ddd;
+        }
+        .filter-container-2 .filters label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .filter-container-2 select, .filter-container-2 input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .filter-container-1 select, .filter-container-1 input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .filter-container-2 input[type="checkbox"] {
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .filter-container-2 button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+        .filter-container-2 .consultar-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .filter-container-2 .consultar-btn:hover {
+            background-color: #c0392b;
+        }
+        .filter-container-2 .imprimir-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        .filter-container-2 .imprimir-btn:hover {
+            background-color: #2980b9;
+        }
+        .filter-container-2 .excel-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .filter-container-2 .excel-btn:hover {
+            background-color: #27ae60;
+        }
+        .suggestions {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: 100%;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        .result-table {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sku-count {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        @media print {
+            .filters, .sku-count, .header {
+                display: none;
+            }
+            .result-table {
+                box-shadow: none;
+                padding: 0;
+            }
+            table {
+                margin-top: 0;
+            }
+        }
+        @media (max-width: 600px) {
+            .filters {
+                flex-direction: column;
+            }
+            .filter-container-1 {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .filter-container-2 button {
+                width: 100%;
+            }
+        }
+        @media (max-width: 400px) {
+            .header h1 {
+                font-size: 1rem;
+            }
+            table {
+                font-size: 0.8rem;
+            }
+        }
+        @media (max-width: 600px) {
+    .result-table {
+        overflow-x: auto;
+        display: block;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Consultas Avançadas </h1>
+    </div>
+    <div class="container">
+        <div class="filters">
+            <div class="filter-container filter-container-1">
+                <label for="grupo">N° Grupo:</label>
+                <select id="grupo" name="grupo" onchange="atualizarFornecedores()">
+                    <option value="">Todos</option>
+                   //Opções serão preenchidas dinamicamente 
+                </select>
+                <label for="nu_fornecedor">N° Fornecedor:</label>
+                <input type="text" id="nu_fornecedor" name="nu_fornecedor" placeholder="Digite o número" oninput="filtrarSugestoes()">
+                <div id="suggestions" class="suggestions"></div>
+                <label for="fornecedor">Nome de Fornecedor:</label>
+                <select id="fornecedor" name="fornecedor">
+                    <option value="">Todos</option>
+                 // Opções serão preenchidas dinamicamente 
+                </select>
+            </div>
+            <div class="filter-container filter-container-2">
+                <label for="codigoBarra">Código ou Barra:</label>
+                <input type="text" id="codigoBarra" name="codigoBarra" placeholder="Digite o código ou barra">
+                <label>Filtrar por Saldo:</label>              
+                <label for="comSaldo">Com Saldo</label>
+                <input type="checkbox" id="comSaldo" name="comSaldo">               
+                <label for="semSaldo">Sem Saldo</label>
+                <input type="checkbox" id="semSaldo" name="semSaldo">
+                <div class="button-group">
+                    <button class="consultar-btn" onclick="buscarItens()">Consultar</button>
+                    <button class="imprimir-btn" onclick="imprimirTabela()">Imprimir</button>
+                    <button class="excel-btn" onclick="salvarComoExcel()">Salvar como Excel</button>
+                </div>
+                <div class="sku-count" id="skuCount">Quantidade de SKUs: 0</div>
+            </div>
+        </div>
+        <div class="result-table">
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>Grupo</th>
+                        <th>Fornecedor</th>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Custo</th>
+                        <th>Preço</th>
+                        <th>Saldo</th>
+                        <th>Barras</th>
+                        <th>Local 1</th>
+                   
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let filtrosData = []; // Armazena todos os dados para filtragem
+
+    // Função para carregar os filtros (Grupo e Fornecedor) inicialmente
+    async function carregarFiltros() {
+        try {
+            const response = await fetch('/consultas_avancadas/filtros', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            console.log('Dados brutos de /filtros:', data); // Log para depuração
+
+            // Criar um mapa único de nu_fornecedor por Grupo e usar nome_fantasia como nome
+            const uniqueFornecedores = {};
+            data.forEach(item => {
+                if (item.nu_fornecedor !== null && item.nu_fornecedor !== undefined) {
+                    if (!uniqueFornecedores[item.nu_fornecedor] || !uniqueFornecedores[item.nu_fornecedor].find(g => g === item.grupo)) {
+                        if (!uniqueFornecedores[item.nu_fornecedor]) uniqueFornecedores[item.nu_fornecedor] = [];
+                        uniqueFornecedores[item.nu_fornecedor].push(item.grupo);
+                    }
+                }
+            });
+            filtrosData = Object.keys(uniqueFornecedores).map(nu_fornecedor => {
+                const fornecedorData = data.find(d => d.nu_fornecedor == nu_fornecedor);
+                return {
+                    grupo: uniqueFornecedores[nu_fornecedor].join(', '),
+                    nu_fornecedor: nu_fornecedor !== 'null' ? nu_fornecedor : null,
+                    nome_fantasia: fornecedorData ? (fornecedorData.nome_fantasia || 'Sem Fornecedor') : 'Fornecedor Não Encontrado'
+                };
+            }).filter(item => item.nu_fornecedor !== null);
+            console.log('filtrosData após processamento:', filtrosData); // Log para depuração
+
+            // Preencher o select de Grupo
+            const grupoSelect = document.getElementById('grupo');
+            const gruposUnicos = [...new Set(data.map(item => item.grupo))].sort();
+            grupoSelect.innerHTML = '<option value="">Todos</option>';
+            gruposUnicos.forEach(grupo => {
+                const option = document.createElement('option');
+                option.value = grupo;
+                option.textContent = grupo;
+                grupoSelect.appendChild(option);
+            });
+
+            // Preencher o select de Fornecedor com todos os fornecedores inicialmente
+            atualizarFornecedores();
+        } catch (error) {
+            console.error('Erro ao carregar filtros:', error);
+            alert('Erro ao carregar filtros. Tente novamente.');
+        }
+    }
+
+    // Função para atualizar os fornecedores com base no grupo selecionado
+    function atualizarFornecedores() {
+        const grupo = document.getElementById('grupo').value;
+        const fornecedorSelect = document.getElementById('fornecedor');
+        const nu_fornecedorInput = document.getElementById('nu_fornecedor');
+        fornecedorSelect.innerHTML = '<option value="">Todos</option>';
+        const suggestions = document.getElementById('suggestions');
+        suggestions.style.display = 'none';
+
+        const fornecedoresFiltrados = grupo
+            ? filtrosData.filter(item => item.grupo.includes(grupo))
+            : filtrosData;
+
+        const fornecedoresUnicos = [...new Set(fornecedoresFiltrados.map(f => f.nu_fornecedor))].sort();
+        console.log('Fornecedores filtrados:', fornecedoresFiltrados); // Log para depuração
+        fornecedoresUnicos.forEach(n => {
+            if (n !== null && n !== undefined) {
+                const fornecedor = fornecedoresFiltrados.find(f => f.nu_fornecedor == n);
+                const fornecedorNome = fornecedor ? fornecedor.nome_fantasia : 'Sem Fornecedor';
+                const option = document.createElement('option');
+                option.value = n;
+                option.textContent = fornecedorNome;
+                fornecedorSelect.appendChild(option);
+            }
+        });
+
+        // Atualizar o valor do input com base no select
+        if (fornecedorSelect.value) {
+            nu_fornecedorInput.value = fornecedorSelect.value;
+        }
+    }
+
+    // Função para filtrar sugestões com base no número digitado
+    function filtrarSugestoes() {
+        const nu_fornecedorInput = document.getElementById('nu_fornecedor');
+        const suggestions = document.getElementById('suggestions');
+        const fornecedorSelect = document.getElementById('fornecedor');
+        const valorDigitado = nu_fornecedorInput.value.trim().toLowerCase();
+
+        suggestions.innerHTML = '';
+        suggestions.style.display = valorDigitado ? 'block' : 'none';
+
+        if (valorDigitado) {
+            const fornecedoresFiltrados = filtrosData.filter(item =>
+                item.nu_fornecedor && item.nu_fornecedor.toString().toLowerCase().includes(valorDigitado)
+            );
+
+            // Remover duplicatas e exibir sugestões
+            const uniqueFornecedores = [...new Map(fornecedoresFiltrados.map(item => [item.nu_fornecedor, item])).values()];
+            console.log('Sugestões filtradas:', uniqueFornecedores); // Log para depuração
+            uniqueFornecedores.forEach(fornecedor => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.textContent = `${fornecedor.nu_fornecedor} - ${fornecedor.nome_fantasia || 'Sem Fornecedor'}`;
+                div.onclick = () => {
+                    nu_fornecedorInput.value = fornecedor.nu_fornecedor;
+                    fornecedorSelect.value = fornecedor.nu_fornecedor;
+                    suggestions.style.display = 'none';
+                    atualizarFornecedores();
+                    buscarItens(); // Chama a busca ao selecionar sugestão
+                };
+                suggestions.appendChild(div);
+            });
+        }
+    }
+
+    // Função para buscar itens com base nos filtros
+    async function buscarItens() {
+        const grupo = document.getElementById('grupo').value;
+        const nu_fornecedor = document.getElementById('nu_fornecedor').value.trim();
+        const fornecedor = nu_fornecedor || document.getElementById('fornecedor').value;
+        const codigoBarra = document.getElementById('codigoBarra').value.trim();
+        const comSaldo = document.getElementById('comSaldo').checked;
+        const semSaldo = document.getElementById('semSaldo').checked;
+        const tableBody = document.getElementById('tableBody');
+        const skuCount = document.getElementById('skuCount');
+
+        try {
+            const response = await fetch(`/consultas_avancadas/dados?grupo=${encodeURIComponent(grupo)}&fornecedor=${encodeURIComponent(fornecedor)}&codigoBarra=${encodeURIComponent(codigoBarra)}&comSaldo=${comSaldo}&semSaldo=${semSaldo}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            console.log('Dados brutos de /dados:', data); // Log para depuração
+
+            // Limpar tabela anterior
+            tableBody.innerHTML = '';
+
+            // Preencher tabela com os resultados
+            if (data.length > 0) {
+                data.forEach(item => {
+                    console.log('Item individual:', item); // Log para cada item
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.grupo || '-'}</td>
+                        <td>${item.nome_fantasia || 'Sem Fornecedor'}</td>
+                        <td>${item.codigo || '-'}</td>
+                        <td>${item.descricao || '-'}</td>
+                        <td>${item.custo || '0.00'}</td>
+                        <td>${item.preco || '0.00'}</td>
+                        <td>${item.saldo || '0'}</td>
+                        <td>${item.barras || '-'}</td>
+                        <td>${item.localizacao1 || '-'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                skuCount.textContent = `Quantidade de SKUs: ${data.length}`;
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="9">Nenhum item encontrado.</td></tr>';
+                skuCount.textContent = 'Quantidade de SKUs: 0';
+            }
+        } catch (error) {
+            console.error('Erro ao buscar itens:', error);
+            tableBody.innerHTML = '<tr><td colspan="9">Erro ao carregar os dados. Tente novamente.</td></tr>';
+            skuCount.textContent = 'Quantidade de SKUs: 0';
+        }
+    }
+
+    // Função para imprimir a tabela
+    function imprimirTabela() {
+        const tableBody = document.getElementById('tableBody');
+        if (tableBody.children.length === 0 || tableBody.innerHTML.includes('Nenhum item encontrado')) {
+            alert('Nenhum dado para imprimir. Realize uma consulta primeiro.');
+            return;
+        }
+        window.print();
+    }
+
+    // Função para salvar a tabela como Excel
+    function salvarComoExcel() {
+        const tableBody = document.getElementById('tableBody');
+        if (tableBody.children.length === 0 || tableBody.innerHTML.includes('Nenhum item encontrado')) {
+            alert('Nenhum dado para exportar. Realize uma consulta primeiro.');
+            return;
+        }
+
+        const table = document.getElementById('resultTable');
+        const rows = table.querySelectorAll('tr');
+        const data = [];
+
+        // Adicionar cabeçalhos
+        const headers = Array.from(rows[0].querySelectorAll('th')).map(th => th.textContent);
+        data.push(headers);
+
+        // Adicionar linhas
+        Array.from(rows).slice(1).forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent);
+            data.push(cells);
+        });
+
+        // Criar workbook e worksheet
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Consultas Avançadas');
+
+        // Exportar e baixar
+        XLSX.writeFile(wb, 'consultas_avancadas.xlsx');
+    }
+
+    // Adicionar evento de tecla Enter para os campos
+    document.getElementById('nu_fornecedor').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Impede o comportamento padrão (ex.: envio de formulário)
+            buscarItens();
+        }
+    });
+
+    document.getElementById('codigoBarra').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            buscarItens();
+        }
+    });
+
+    document.getElementById('grupo').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            buscarItens();
+        }
+    });
+
+    // Carregar filtros ao iniciar a página
+    window.onload = carregarFiltros;
+
+    // Fechar sugestões ao clicar fora
+    document.addEventListener('click', function(event) {
+        const suggestions = document.getElementById('suggestions');
+        const nu_fornecedorInput = document.getElementById('nu_fornecedor');
+        if (!nu_fornecedorInput.contains(event.target) && !suggestions.contains(event.target)) {
+            suggestions.style.display = 'none';
+        }
+    });
+    </script>
+</body>
+</html>

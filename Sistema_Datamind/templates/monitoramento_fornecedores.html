@@ -1,0 +1,224 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de Fornecedores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #1e2a44;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            background-color: #ffffff;
+            color: #1e2a44;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        #sugestoes {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .sugestao-item {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .sugestao-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Monitoramento de Fornecedores</h1>
+        <div>
+            <a href="{{ url_for('index') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2">Voltar</a>
+            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Sair</a>
+        </div>
+    </div>
+
+    <!-- Campo de Busca com Autocompletar -->
+    <div class="mb-6 relative">
+        <label for="filtroFornecedor" class="text-lg mr-2">Buscar por Fornecedor ou Número:</label>
+        <input type="text" id="filtroFornecedor" class="p-2 rounded text-black w-64" placeholder="Digite o nome ou número do fornecedor" onkeyup="buscarSugestoes()">
+        <div id="sugestoes" class="absolute z-10 bg-white text-black w-64 mt-1 rounded shadow-lg hidden"></div>
+        <button onclick="buscarPorFornecedor()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded ml-2">Buscar</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card: Estoque por Fornecedor -->
+        <div class="card col-span-2">
+            <h2 class="text-xl font-semibold mb-4">Estoque por Fornecedor</h2>
+            <canvas id="estoqueChart" height="100"></canvas>
+        </div>
+
+        <!-- Card: Item que Mais Sai -->
+        <div class="card">
+            <h2 class="text-xl font-semibold mb-4">Item que Mais Sai</h2>
+            <div id="itemMaisSai">
+                <p><strong>Código:</strong> <span id="itemCodigo"></span></p>
+                <p><strong>Descrição:</strong> <span id="itemDescricao"></span></p>
+                <p><strong>Fornecedor:</strong> <span id="itemFornecedor"></span></p>
+                <p><strong>Total Saídas:</strong> <span id="itemSaidas"></span></p>
+            </div>
+        </div>
+
+        <!-- Tabela: Itens com Saldo Baixo -->
+        <div class="card col-span-3">
+            <h2 class="text-xl font-semibold mb-4">Itens com Saldo Baixo (Reposição Necessária)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700">
+                            <th class="p-3">Código</th>
+                            <th class="p-3">Descrição</th>
+                            <th class="p-3">Nº Fornecedor</th>
+                            <th class="p-3">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itensSaldoBaixo">
+                        <!-- Preenchido via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let estoqueChartInstance = null; // Para armazenar a instância do gráfico
+
+        // Função para carregar os dados do dashboard
+        async function carregarDadosDashboard(filtroFornecedor = '') {
+            try {
+                const url = filtroFornecedor ? `/dados_monitoramento_fornecedores?filtro=${encodeURIComponent(filtroFornecedor)}` : '/dados_monitoramento_fornecedores';
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('Erro ao carregar dados:', data.error);
+                    return;
+                }
+
+                // 1. Gráfico de Estoque por Fornecedor
+                const estoqueFornecedores = data.estoque_fornecedores || [];
+                const labels = estoqueFornecedores.map(item => item.fornecedor || 'Desconhecido');
+                const valores = estoqueFornecedores.map(item => item.estoque_total || 0);
+
+                const ctx = document.getElementById('estoqueChart').getContext('2d');
+
+                if (estoqueChartInstance) {
+                    estoqueChartInstance.destroy();
+                }
+
+                estoqueChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Estoque Total',
+                            data: valores,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Estoque Total (unidades)',
+                                    color: '#1e2a44'
+                                },
+                                ticks: { color: '#1e2a44' }
+                            },
+                            x: {
+                                ticks: { color: '#1e2a44' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#1e2a44' }
+                            }
+                        }
+                    }
+                });
+
+                // 2. Item que Mais Sai
+                const itemMaisSai = data.item_mais_sai || {};
+                document.getElementById('itemCodigo').textContent = itemMaisSai.codigo || 'N/A';
+                document.getElementById('itemDescricao').textContent = itemMaisSai.descricao || 'N/A';
+                document.getElementById('itemFornecedor').textContent = itemMaisSai.nu_fornecedor || 'N/A';
+                document.getElementById('itemSaidas').textContent = itemMaisSai.total_saida || '0';
+
+                // 3. Itens com Saldo Baixo
+                const itensSaldoBaixo = data.itens_saldo_baixo || [];
+                const tbody = document.getElementById('itensSaldoBaixo');
+                tbody.innerHTML = '';
+                itensSaldoBaixo.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="p-3">${item.codigo || 'N/A'}</td>
+                        <td class="p-3">${item.descricao || 'N/A'}</td>
+                        <td class="p-3">${item.nu_fornecedor || 'N/A'}</td>
+                        <td class="p-3 text-red-600 font-semibold">${item.saldo || 0}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do dashboard:', error);
+            }
+        }
+
+        // Função para buscar por fornecedor
+        function buscarPorFornecedor() {
+            const filtroFornecedor = document.getElementById('filtroFornecedor').value.trim();
+            carregarDadosDashboard(filtroFornecedor);
+        }
+
+        // Função para buscar sugestões de autocompletar
+        async function buscarSugestoes() {
+            const termo = document.getElementById('filtroFornecedor').value.trim();
+            if (termo.length < 2) {
+                document.getElementById('sugestoes').classList.add('hidden');
+                return;
+            }
+            const response = await fetch(`/sugestoes_fornecedores?termo=${encodeURIComponent(termo)}`);
+            const sugestoes = await response.json();
+            const sugestoesDiv = document.getElementById('sugestoes');
+            sugestoesDiv.innerHTML = '';
+            if (sugestoes.length > 0) {
+                sugestoes.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'sugestao-item';
+                    div.textContent = `${s.nome_fantasia} (${s.nu_fornecedor})`;
+                    div.onclick = () => {
+                        document.getElementById('filtroFornecedor').value = s.nome_fantasia || s.nu_fornecedor;
+                        sugestoesDiv.classList.add('hidden');
+                        buscarPorFornecedor();
+                    };
+                    sugestoesDiv.appendChild(div);
+                });
+                sugestoesDiv.classList.remove('hidden');
+            } else {
+                sugestoesDiv.classList.add('hidden');
+            }
+        }
+
+        // Carregar os dados ao carregar a página (sem filtro inicialmente)
+        window.onload = () => carregarDadosDashboard();
+    </script>
+</body>
+</html>
