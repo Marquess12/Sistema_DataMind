@@ -1,258 +1,290 @@
-
-
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema de Gestão de Estoque</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
 
-        body {
-            background-color: #f4f4f4;
-        }
+      body {
+        background-color: #f4f4f4;
+      }
 
-        .header {
-            background-color: #34495e;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
+      .header {
+        background-color: #34495e;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
 
-        .header h1 {
-            font-size: 24px;
-        }
+      .header h1 {
+        font-size: 24px;
+      }
 
-        .logout-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            color: white;
-            background-color: #e74c3c;
-        }
+      .logout-btn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        color: white;
+        background-color: #e74c3c;
+      }
 
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
+      .logout-btn:hover {
+        background-color: #c0392b;
+      }
 
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
 
-        .dropbtn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            color: white;
-            background-color: #3498db;
-        }
+      .dropbtn {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        color: white;
+        background-color: #3498db;
+      }
 
-        .dropbtn:hover {
-            background-color: #2980b9;
-        }
+      .dropbtn:hover {
+        background-color: #2980b9;
+      }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #34495e;
-            min-width: 160px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1001;
-            border-radius: 4px;
-            overflow: hidden;
-        }
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #34495e;
+        min-width: 160px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        border-radius: 4px;
+        overflow: hidden;
+      }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
 
-        .dropdown-content a {
-            color: white;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
+      .dropdown-content a {
+        color: white;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+      }
 
-        .dropdown-content a:hover {
-            background-color: #2980b9;
-        }
+      .dropdown-content a:hover {
+        background-color: #2980b9;
+      }
 
-        .solicitacoes .dropbtn { background-color: #f39c12; }
-        .solicitacoes .dropbtn:hover { background-color: #d35400; }
-        .estoque .dropbtn { background-color: #2ecc71; }
-        .estoque .dropbtn:hover { background-color: #27ae60; }
-        .relatorios .dropbtn { background-color: #1abc9c; }
-        .relatorios .dropbtn:hover { background-color: #16a085; }
-        .rh .dropbtn { background-color: #9b59b6; }
-        .rh .dropbtn:hover { background-color: #8e44ad; }
+      .solicitacoes .dropbtn {
+        background-color: #f39c12;
+      }
+      .solicitacoes .dropbtn:hover {
+        background-color: #d35400;
+      }
+      .estoque .dropbtn {
+        background-color: #2ecc71;
+      }
+      .estoque .dropbtn:hover {
+        background-color: #27ae60;
+      }
+      .relatorios .dropbtn {
+        background-color: #1abc9c;
+      }
+      .relatorios .dropbtn:hover {
+        background-color: #16a085;
+      }
+      .rh .dropbtn {
+        background-color: #9b59b6;
+      }
+      .rh .dropbtn:hover {
+        background-color: #8e44ad;
+      }
 
-        .container {
-            margin-top: 80px;
-            padding: 20px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+      .container {
+        margin-top: 80px;
+        padding: 20px;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <h1>Gestão de Estoque</h1>
-        <div class="header-buttons">
-          <div class="dropdown analises">
-  <button class="dropbtn">Análises</button>
-  <div class="dropdown-content">
-    <a href="/analise_vendas" onclick="abrirAnaliseVendas()">Análise de Vendas</a>
-    <a href="/alerta_lojas" onclick="abrirAnaliseRupturas()">Análise de Rupturas</a>
-  </div>
-</div>
-            <div class="dropdown solicitacoes">
-                <button class="dropbtn">Solicitações</button>
-                <div class="dropdown-content">
-                    <a href="/solicitacoes_loja" onclick="abrirSolicitacoesLoja()">Solicitações da Loja</a>
-                    <a href="/acomp_solic_deposito" onclick="abrirAcompSolicDeposito()">Acompanhamento de Solicitações</a>
-                </div>
-            </div>
-            <div class="dropdown estoque">
-                <button class="dropbtn">Estoque</button>
-                <div class="dropdown-content">
-                    <a href="/index" onclick="abririndex()">Gestão de Estoque</a>
-                    <a href="/ajustes_realizados" onclick="abrirAjustesRealizados()">Ajustes Realizados</a>
-                    <a href="/liberar-ajustes" onclick="abrirLiberarAjustes()">Liberar Ajustes</a>
-                    <a href="/monitoramento_fornecedores" onclick="abrirMonitoramentoFornecedores()">Monitoramento de Fornecedores</a>
-                    <a href="/consultas_avancadas" onclick="abrirconsultasavancadas()">Consultar Estoque</a>
-                    
-                </div>
-            </div>
-            <div class="dropdown relatorios">
-                <button class="dropbtn">Relatórios</button>
-                <div class="dropdown-content">
-                    <a href="/relatorio" onclick="abrirRelatorio()">Ajustes</a>
-                    <a href="/conferencia" onclick="abrirConferencia()">Conferência</a>
-                </div>
-            </div>
-            <div class="dropdown rh">
-                <button class="dropbtn">RH</button>
-                <div class="dropdown-content">
-                    <a href="/cv_analise" onclick="abrirCVAnalise()">CV-Análise</a>
-                    <a href="/cadastro_vagas" onclick="abrirCadastrarVagas()">Cadastrar Vagas</a>
-                    <a href="/selecionar_candidatos" onclick="abrirSelecionarCandidatos()">Selecionar Candidatos</a>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()">Sair</button>
+      <h1>Gestão de Estoque</h1>
+      <div class="header-buttons">
+        <div class="dropdown analises">
+          <button class="dropbtn">Análises</button>
+          <div class="dropdown-content">
+            <a href="/analise_vendas" onclick="abrirAnaliseVendas()"
+              >Análise de Vendas</a
+            >
+            <a href="/alerta_lojas" onclick="abrirAnaliseRupturas()"
+              >Análise de Rupturas</a
+            >
+          </div>
         </div>
+        <div class="dropdown solicitacoes">
+          <button class="dropbtn">Solicitações</button>
+          <div class="dropdown-content">
+            <a href="/solicitacoes_loja" onclick="abrirSolicitacoesLoja()"
+              >Solicitações da Loja</a
+            >
+            <a href="/acomp_solic_deposito" onclick="abrirAcompSolicDeposito()"
+              >Acompanhamento de Solicitações</a
+            >
+          </div>
+        </div>
+        <div class="dropdown estoque">
+          <button class="dropbtn">Estoque</button>
+          <div class="dropdown-content">
+            <a href="/index" onclick="abririndex()">Gestão de Estoque</a>
+            <a href="/ajustes_realizados" onclick="abrirAjustesRealizados()"
+              >Ajustes Realizados</a
+            >
+            <a href="/liberar-ajustes" onclick="abrirLiberarAjustes()"
+              >Liberar Ajustes</a
+            >
+            <a
+              href="/monitoramento_fornecedores"
+              onclick="abrirMonitoramentoFornecedores()"
+              >Monitoramento de Fornecedores</a
+            >
+            <a href="/consultas_avancadas" onclick="abrirconsultasavancadas()"
+              >Consultar Estoque</a
+            >
+          </div>
+        </div>
+        <div class="dropdown relatorios">
+          <button class="dropbtn">Relatórios</button>
+          <div class="dropdown-content">
+            <a href="/relatorio" onclick="abrirRelatorio()">Ajustes</a>
+            <a href="/conferencia" onclick="abrirConferencia()">Conferência</a>
+          </div>
+        </div>
+        <div class="dropdown rh">
+          <button class="dropbtn">RH</button>
+          <div class="dropdown-content">
+            <a href="/cv_analise" onclick="abrirCVAnalise()">CV-Análise</a>
+            <a href="/cadastro_vagas" onclick="abrirCadastrarVagas()"
+              >Cadastrar Vagas</a
+            >
+            <a
+              href="/selecionar_candidatos"
+              onclick="abrirSelecionarCandidatos()"
+              >Selecionar Candidatos</a
+            >
+            <a href="{{ url_for('cadastro_promotores') }}" class="btn">
+              <i class="fas fa-user-plus"></i> Cadastrar Promotor
+            </a>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
     </div>
 
     <div class="container">
-        <h2>Bem-vindo ao Sistema de Gestão de Estoque</h2>
-        <p>Selecione uma opção no menu acima para começar.</p>
+      <h2>Bem-vindo ao Sistema de Gestão de Estoque</h2>
+      <p>Selecione uma opção no menu acima para começar.</p>
     </div>
 
     <script>
-        function abrirSolicitacoesLoja() {
-            console.log("Botão Solicitações da Loja clicado.");
-            window.location.href = '/solicitacoes_loja';
-        }
+      function abrirSolicitacoesLoja() {
+        console.log("Botão Solicitações da Loja clicado.");
+        window.location.href = "/solicitacoes_loja";
+      }
 
-        function abrirAcompSolicDeposito() {
-            console.log("Botão Acompanhamento de Solicitações clicado.");
-            window.location.href = '/acomp_solic_deposito.';
-        }
+      function abrirAcompSolicDeposito() {
+        console.log("Botão Acompanhamento de Solicitações clicado.");
+        window.location.href = "/acomp_solic_deposito.";
+      }
 
-        function abririndex() {
-            console.log("Botão Gestão de Estoque clicado.");
-            window.location.href = '/index';
-        }
+      function abririndex() {
+        console.log("Botão Gestão de Estoque clicado.");
+        window.location.href = "/index";
+      }
 
-        function abrirRelatorio() {
-            console.log("Botão Relatório clicado.");
-            window.location.href = '/relatorio';
-        }
+      function abrirRelatorio() {
+        console.log("Botão Relatório clicado.");
+        window.location.href = "/relatorio";
+      }
 
-        function abriralertalojas() {
-            console.log("Botão Análise de Rupturas.");
-            window.location.href = '/alerta_lojas';
-        }
+      function abriralertalojas() {
+        console.log("Botão Análise de Rupturas.");
+        window.location.href = "/alerta_lojas";
+      }
 
-        function abrirConferencia() {
-            console.log("Botão Conferência clicado.");
-            window.location.href = '/conferencia';
-        }
+      function abrirConferencia() {
+        console.log("Botão Conferência clicado.");
+        window.location.href = "/conferencia";
+      }
 
-        function abrirCVAnalise() {
-            console.log("Botão CV-Análise clicado.");
-            window.location.href = '/cv_analise';
-        }
+      function abrirCVAnalise() {
+        console.log("Botão CV-Análise clicado.");
+        window.location.href = "/cv_analise";
+      }
 
-        function abrirAjustesRealizados() {
-            console.log("Botão Ajustes Realizados clicado.");
-            window.location.href = '/ajustes_realizados';
-        }
+      function abrirAjustesRealizados() {
+        console.log("Botão Ajustes Realizados clicado.");
+        window.location.href = "/ajustes_realizados";
+      }
 
-        function abrirLiberarAjustes() {
-            console.log("Botão Liberar Ajustes clicado.");
-            window.location.href = '/liberar-ajustes';
-        }
-        
-        function abrirAnaliseVendas() {
-            console.log("Botão Análise de Vendas clicado.");
-            window.location.href = '/analise_vendas';
-        }
+      function abrirLiberarAjustes() {
+        console.log("Botão Liberar Ajustes clicado.");
+        window.location.href = "/liberar-ajustes";
+      }
 
-        function abrirCadastrarVagas() {
-            console.log("Botão Cadastrar Vagas clicado.");
-            window.location.href = '/cadastro_vagas';
-        }
+      function abrirAnaliseVendas() {
+        console.log("Botão Análise de Vendas clicado.");
+        window.location.href = "/analise_vendas";
+      }
 
-        function abrirSelecionarCandidatos() {
-            console.log("Botão Selecionar Candidatos clicado.");
-            window.location.href = '/selecionar_candidatos';
-        }
+      function abrirCadastrarVagas() {
+        console.log("Botão Cadastrar Vagas clicado.");
+        window.location.href = "/cadastro_vagas";
+      }
 
-        function abrirMonitoramentoFornecedores() {
-            console.log("Botão Monitoramento de Fornecedores clicado.");
-            window.location.href = '/monitoramento_fornecedores';
-        }
+      function abrirSelecionarCandidatos() {
+        console.log("Botão Selecionar Candidatos clicado.");
+        window.location.href = "/selecionar_candidatos";
+      }
 
-        function abrirconsultasavancadas() {
-            console.log("Botão Consultar Estoque clicado.");
-            window.location.href = '/consultas_avancadas';
-        }
+      function abrirMonitoramentoFornecedores() {
+        console.log("Botão Monitoramento de Fornecedores clicado.");
+        window.location.href = "/monitoramento_fornecedores";
+      }
 
-        function logout() {
-            console.log("Executando logout...");
-            window.location.href = '/logout';
-        }
+      function abrirconsultasavancadas() {
+        console.log("Botão Consultar Estoque clicado.");
+        window.location.href = "/consultas_avancadas";
+      }
+
+      function logout() {
+        console.log("Executando logout...");
+        window.location.href = "/logout";
+      }
     </script>
-</body>
+  </body>
 </html>
-
-
-
-
-
-
-

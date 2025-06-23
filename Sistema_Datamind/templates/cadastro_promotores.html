@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Promotores e Rotas</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Cadastro de Promotores e Rotas</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <form
+        action="{{ url_for('cadastro_promotores') }}"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="container-section">
+          <h2>Informações do Promotor</h2>
+          <div class="form-group">
+            <label for="foto_promotor">Foto do Promotor:</label>
+            <input
+              type="file"
+              id="foto_promotor"
+              name="foto_promotor"
+              class="form-control"
+              accept="image/*"
+            />
+          </div>
+          <div class="form-group">
+            <label for="nome_promotor">Nome:</label>
+            <input
+              type="text"
+              id="nome_promotor"
+              name="nome_promotor"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="marca_fornecedor">Marca/Fornecedor:</label>
+            <input
+              type="text"
+              id="marca_fornecedor"
+              name="marca_fornecedor"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="email_promotor">Email:</label>
+            <input
+              type="email"
+              id="email_promotor"
+              name="email_promotor"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="telefone_promotor">Telefone:</label>
+            <input
+              type="tel"
+              id="telefone_promotor"
+              name="telefone_promotor"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="container-section">
+          <h2>Informações do Contratante/Gestor</h2>
+          <div class="form-group">
+            <label for="nome_gestor">Responsável/Gestor:</label>
+            <input
+              type="text"
+              id="nome_gestor"
+              name="nome_gestor"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="email_gestor">Email:</label>
+            <input
+              type="email"
+              id="email_gestor"
+              name="email_gestor"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="telefone_gestor">Telefone:</label>
+            <input
+              type="tel"
+              id="telefone_gestor"
+              name="telefone_gestor"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="container-section">
+          <h2>Cadastro de Rota</h2>
+          {% for filial in filiais %}
+          <div class="loja-container container-section">
+            <h3>{{ filial.nome }} (Cód: {{ filial.codigo }})</h3>
+            <div
+              id="horarios-loja-{{ filial.codigo }}"
+              class="horarios-container"
+            ></div>
+            <button
+              type="button"
+              class="btn-add-horario"
+              onclick="adicionarHorario('{{ filial.codigo }}')"
+            >
+              + Adicionar Dia/Horário
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="btn">Cadastrar Promotor e Rotas</button>
+        <a href="{{ url_for('index') }}" class="btn-voltar">Voltar</a>
+      </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='cadastro_promotores.js') }}"></script>
+  </body>
+</html>

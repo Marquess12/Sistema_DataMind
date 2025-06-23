@@ -22,6 +22,9 @@ import time
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from flask import request, render_template
+import os
+from werkzeug.utils import secure_filename
+
 # Carrega variáveis do arquivo .env
 load_dotenv()
 
@@ -4112,4 +4115,115 @@ if __name__ == '__main__':
     print("Iniciando o servidor Flask...")
     app.run(debug=True, host='0.0.0.0', port=5000)
 
+#-------------------------------------------------------
+
+# ... (outras importações)
+
+# Defina a lista de filiais em um local acessível pela rota
+FILIAIS = [
+    {"codigo": "1", "nome": "Ponta Negra"},
+    {"codigo": "2", "nome": "Alecrim"},
+    {"codigo": "7", "nome": "SAC - Centro VI"},
+    {"codigo": "100", "nome": "Lagoa Nova"},
+    {"codigo": "121", "nome": "Norte Shopping"},
+    {"codigo": "122", "nome": "Parnamirim"},
+    {"codigo": "131", "nome": "ZN2"},
+    {"codigo": "137", "nome": "Macaíba"},
+    {"codigo": "140", "nome": "Maria Lacerda"},
+    {"codigo": "141", "nome": "Igapó"}
+]
+
+# Configure uma pasta para uploads
+app.config['UPLOAD_FOLDER'] = 'static/uploads/promotores'
+# Garanta que o diretório de uploads exista
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+@app.route('/cadastro_promotores', methods=['GET', 'POST'])
+def cadastro_promotores():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        conn = None
+        try:
+            # --- 1. Coletar dados do Promotor e Gestor ---
+            nome_promotor = request.form['nome_promotor']
+            marca_fornecedor = request.form['marca_fornecedor']
+            email_promotor = request.form['email_promotor']
+            telefone_promotor = request.form['telefone_promotor']
+            
+            nome_gestor = request.form['nome_gestor']
+            email_gestor = request.form['email_gestor']
+            telefone_gestor = request.form['telefone_gestor']
+
+            # --- 2. Lidar com o Upload da Foto ---
+            foto_promotor = request.files.get('foto_promotor')
+            nome_arquivo_foto = None
+            if foto_promotor and foto_promotor.filename != '':
+                # Garante um nome de arquivo seguro
+                filename = secure_filename(foto_promotor.filename)
+                # Salva o arquivo
+                caminho_arquivo = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                foto_promotor.save(caminho_arquivo)
+                nome_arquivo_foto = filename # Guarda apenas o nome para salvar no DB
+            
+            # --- 3. Inserir Promotor no Banco e Obter a ID ---
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # ATENÇÃO: Ajuste o SQL para sua tabela real
+            sql_promotor = """
+                INSERT INTO tbl_promotores 
+                (Nome, MarcaFornecedor, Email, Telefone, NomeGestor, EmailGestor, TelefoneGestor, Foto)
+                OUTPUT INSERTED.ID
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            """
+            
+            promotor_id = cursor.execute(
+                sql_promotor, 
+                nome_promotor, marca_fornecedor, email_promotor, telefone_promotor,
+                nome_gestor, email_gestor, telefone_gestor, nome_arquivo_foto
+            ).fetchval() # fetchval() é específico do pyodbc para pegar o valor de OUTPUT
+
+            # --- 4. Processar e Inserir Rotas ---
+            for filial in FILIAIS:
+                codigo_loja = filial['codigo']
+                
+                # O .getlist() pega todos os valores com o mesmo 'name'
+                dias_semana = request.form.getlist(f'loja_{codigo_loja}_dia_semana[]')
+                entradas = request.form.getlist(f'loja_{codigo_loja}_entrada[]')
+                saidas = request.form.getlist(f'loja_{codigo_loja}_saida[]')
+                intervalos = request.form.getlist(f'loja_{codigo_loja}_intervalo[]')
+
+                # Itera sobre os horários adicionados para essa loja
+                for i in range(len(dias_semana)):
+                    dia = dias_semana[i]
+                    entrada = entradas[i]
+                    saida = saidas[i]
+                    # Garante que o intervalo tenha um valor, mesmo que vazio
+                    intervalo = intervalos[i] if i < len(intervalos) and intervalos[i] else None
+
+                    if dia and entrada and saida: # Garante que os dados essenciais existem
+                        sql_rota = """
+                            INSERT INTO tbl_rotas_promotores 
+                            (ID_Promotor, CodigoLoja, DiaSemana, HorarioEntrada, HorarioSaida, HorarioIntervalo)
+                            VALUES (?, ?, ?, ?, ?, ?);
+                        """
+                        cursor.execute(sql_rota, promotor_id, codigo_loja, dia, entrada, saida, intervalo)
+
+            conn.commit()
+            flash('Promotor e suas rotas cadastrados com sucesso!', 'success')
+
+        except Exception as e:
+            logging.error(f"Erro no cadastro do promotor: {e}")
+            flash(f'Ocorreu um erro ao cadastrar: {e}', 'danger')
+        
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect(url_for('cadastro_promotores'))
+
+    # Para método GET, apenas renderiza a página passando a lista de filiais
+    return render_template('cadastro_promotores.html', filiais=FILIAIS)
 
