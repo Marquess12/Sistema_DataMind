@@ -4218,7 +4218,7 @@ def cadastro_promotores():
         return redirect(url_for('cadastro_promotores'))
 
     # Para método GET, apenas renderiza a página passando a lista de filiais
-    return render_template('cadastro_promotores.html', filiais=FILIAIS)
+    return render_template('cadastro_promotores', filiais=FILIAIS)
 
 if __name__ == '__main__':
     print("Iniciando o servidor Flask...")
