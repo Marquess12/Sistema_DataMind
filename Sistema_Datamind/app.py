@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_file
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_file
 from datetime import datetime, timedelta
 import mysql.connector
 from langchain_groq import ChatGroq
@@ -4110,13 +4110,6 @@ def analisar_curriculos():
     conn.close()
     return jsonify(resultados)
 
-
-if __name__ == '__main__':
-    print("Iniciando o servidor Flask...")
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
-#-------------------------------------------------------
-
 # ... (outras importações)
 
 # Defina a lista de filiais em um local acessível pela rota
@@ -4226,4 +4219,8 @@ def cadastro_promotores():
 
     # Para método GET, apenas renderiza a página passando a lista de filiais
     return render_template('cadastro_promotores.html', filiais=FILIAIS)
+
+if __name__ == '__main__':
+    print("Iniciando o servidor Flask...")
+    app.run(debug=True, host='0.0.0.0', port=5000)
 
