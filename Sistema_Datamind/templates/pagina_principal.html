@@ -187,7 +187,7 @@
         <div class="dropdown rh">
           <button class="dropbtn">RH</button>
           <div class="dropdown-content">
-            <a href="/cv_analise" onclick="abrirCVAnalise()">CV-Análise</a>
+            <a href="/cv_analise" onclick="abrirCVAnalise()">CV-Análise </a>
             <a href="/cadastro_vagas" onclick="abrirCadastrarVagas()"
               >Cadastrar Vagas</a
             >
@@ -196,9 +196,9 @@
               onclick="abrirSelecionarCandidatos()"
               >Selecionar Candidatos</a
             >
-            <a href="{{ url_for('cadastro_promotores') }}" class="btn">
-              <i class="fas fa-user-plus"></i> Cadastrar Promotor
-            </a>
+            <a href="/cadastro_promotores" onclick="abrirCadastroPromotores()"
+              >Cadastro Promotores</a
+            >
           </div>
         </div>
         <button class="logout-btn" onclick="logout()">Sair</button>
