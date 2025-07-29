@@ -24,6 +24,7 @@ from urllib3.util.retry import Retry
 from flask import request, render_template
 import os
 from werkzeug.utils import secure_filename
+from flask_cors import CORS # Adicionado para permitir requisições do frontend
 
 # Carrega variáveis do arquivo .env
 load_dotenv()
@@ -4131,96 +4132,226 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads/promotores'
 # Garanta que o diretório de uploads exista
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-@app.route('/cadastro_promotores', methods=['GET', 'POST'])
-def cadastro_promotores():
-    if 'username' not in session:
-        return redirect(url_for('login'))
+# @app.route('/cadastro_promotores', methods=['GET', 'POST'])
+# def cadastro_promotores():
+#     if 'username' not in session:
+#         return redirect(url_for('login'))
 
-    if request.method == 'POST':
-        conn = None
-        try:
-            # --- 1. Coletar dados do Promotor e Gestor ---
-            nome_promotor = request.form['nome_promotor']
-            marca_fornecedor = request.form['marca_fornecedor']
-            email_promotor = request.form['email_promotor']
-            telefone_promotor = request.form['telefone_promotor']
+#     if request.method == 'POST':
+#         conn = None
+#         try:
+#             # --- 1. Coletar dados do Promotor e Gestor ---
+#             nome_promotor = request.form['nome_promotor']
+#             marca_fornecedor = request.form['marca_fornecedor']
+#             email_promotor = request.form['email_promotor']
+#             telefone_promotor = request.form['telefone_promotor']
             
-            nome_gestor = request.form['nome_gestor']
-            email_gestor = request.form['email_gestor']
-            telefone_gestor = request.form['telefone_gestor']
+#             nome_gestor = request.form['nome_gestor']
+#             email_gestor = request.form['email_gestor']
+#             telefone_gestor = request.form['telefone_gestor']
 
-            # --- 2. Lidar com o Upload da Foto ---
-            foto_promotor = request.files.get('foto_promotor')
-            nome_arquivo_foto = None
-            if foto_promotor and foto_promotor.filename != '':
-                # Garante um nome de arquivo seguro
-                filename = secure_filename(foto_promotor.filename)
-                # Salva o arquivo
-                caminho_arquivo = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                foto_promotor.save(caminho_arquivo)
-                nome_arquivo_foto = filename # Guarda apenas o nome para salvar no DB
+#             # --- 2. Lidar com o Upload da Foto ---
+#             foto_promotor = request.files.get('foto_promotor')
+#             nome_arquivo_foto = None
+#             if foto_promotor and foto_promotor.filename != '':
+#                 # Garante um nome de arquivo seguro
+#                 filename = secure_filename(foto_promotor.filename)
+#                 # Salva o arquivo
+#                 caminho_arquivo = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#                 foto_promotor.save(caminho_arquivo)
+#                 nome_arquivo_foto = filename # Guarda apenas o nome para salvar no DB
             
-            # --- 3. Inserir Promotor no Banco e Obter a ID ---
-            conn = get_db_connection()
-            cursor = conn.cursor()
+#             # --- 3. Inserir Promotor no Banco e Obter a ID ---
+#             conn = get_db_connection()
+#             cursor = conn.cursor()
             
-            # ATENÇÃO: Ajuste o SQL para sua tabela real
-            sql_promotor = """
-                INSERT INTO tbl_promotores 
-                (Nome, MarcaFornecedor, Email, Telefone, NomeGestor, EmailGestor, TelefoneGestor, Foto)
-                OUTPUT INSERTED.ID
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-            """
+#             # ATENÇÃO: Ajuste o SQL para sua tabela real
+#             sql_promotor = """
+#                 INSERT INTO tbl_promotores 
+#                 (Nome, MarcaFornecedor, Email, Telefone, NomeGestor, EmailGestor, TelefoneGestor, Foto)
+#                 OUTPUT INSERTED.ID
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+#             """
             
-            promotor_id = cursor.execute(
-                sql_promotor, 
-                nome_promotor, marca_fornecedor, email_promotor, telefone_promotor,
-                nome_gestor, email_gestor, telefone_gestor, nome_arquivo_foto
-            ).fetchval() # fetchval() é específico do pyodbc para pegar o valor de OUTPUT
+#             promotor_id = cursor.execute(
+#                 sql_promotor, 
+#                 nome_promotor, marca_fornecedor, email_promotor, telefone_promotor,
+#                 nome_gestor, email_gestor, telefone_gestor, nome_arquivo_foto
+#             ).fetchval() # fetchval() é específico do pyodbc para pegar o valor de OUTPUT
 
-            # --- 4. Processar e Inserir Rotas ---
-            for filial in FILIAIS:
-                codigo_loja = filial['codigo']
+#             # --- 4. Processar e Inserir Rotas ---
+#             for filial in FILIAIS:
+#                 codigo_loja = filial['codigo']
                 
-                # O .getlist() pega todos os valores com o mesmo 'name'
-                dias_semana = request.form.getlist(f'loja_{codigo_loja}_dia_semana[]')
-                entradas = request.form.getlist(f'loja_{codigo_loja}_entrada[]')
-                saidas = request.form.getlist(f'loja_{codigo_loja}_saida[]')
-                intervalos = request.form.getlist(f'loja_{codigo_loja}_intervalo[]')
+#                 # O .getlist() pega todos os valores com o mesmo 'name'
+#                 dias_semana = request.form.getlist(f'loja_{codigo_loja}_dia_semana[]')
+#                 entradas = request.form.getlist(f'loja_{codigo_loja}_entrada[]')
+#                 saidas = request.form.getlist(f'loja_{codigo_loja}_saida[]')
+#                 intervalos = request.form.getlist(f'loja_{codigo_loja}_intervalo[]')
 
-                # Itera sobre os horários adicionados para essa loja
-                for i in range(len(dias_semana)):
-                    dia = dias_semana[i]
-                    entrada = entradas[i]
-                    saida = saidas[i]
-                    # Garante que o intervalo tenha um valor, mesmo que vazio
-                    intervalo = intervalos[i] if i < len(intervalos) and intervalos[i] else None
+#                 # Itera sobre os horários adicionados para essa loja
+#                 for i in range(len(dias_semana)):
+#                     dia = dias_semana[i]
+#                     entrada = entradas[i]
+#                     saida = saidas[i]
+#                     # Garante que o intervalo tenha um valor, mesmo que vazio
+#                     intervalo = intervalos[i] if i < len(intervalos) and intervalos[i] else None
 
-                    if dia and entrada and saida: # Garante que os dados essenciais existem
-                        sql_rota = """
-                            INSERT INTO tbl_rotas_promotores 
-                            (ID_Promotor, CodigoLoja, DiaSemana, HorarioEntrada, HorarioSaida, HorarioIntervalo)
-                            VALUES (?, ?, ?, ?, ?, ?);
-                        """
-                        cursor.execute(sql_rota, promotor_id, codigo_loja, dia, entrada, saida, intervalo)
+#                     if dia and entrada and saida: # Garante que os dados essenciais existem
+#                         sql_rota = """
+#                             INSERT INTO tbl_rotas_promotores 
+#                             (ID_Promotor, CodigoLoja, DiaSemana, HorarioEntrada, HorarioSaida, HorarioIntervalo)
+#                             VALUES (?, ?, ?, ?, ?, ?);
+#                         """
+#                         cursor.execute(sql_rota, promotor_id, codigo_loja, dia, entrada, saida, intervalo)
 
-            conn.commit()
-            flash('Promotor e suas rotas cadastrados com sucesso!', 'success')
+#             conn.commit()
+#             flash('Promotor e suas rotas cadastrados com sucesso!', 'success')
 
-        except Exception as e:
-            logging.error(f"Erro no cadastro do promotor: {e}")
-            flash(f'Ocorreu um erro ao cadastrar: {e}', 'danger')
+#         except Exception as e:
+#             logging.error(f"Erro no cadastro do promotor: {e}")
+#             flash(f'Ocorreu um erro ao cadastrar: {e}', 'danger')
         
-        finally:
-            if conn:
-                conn.close()
+#         finally:
+#             if conn:
+#                 conn.close()
 
-        return redirect(url_for('cadastro_promotores'))
+#         return redirect(url_for('cadastro_promotores'))
 
-    # Para método GET, apenas renderiza a página passando a lista de filiais
-    return render_template('cadastro_promotores', filiais=FILIAIS)
+#     # Para método GET, apenas renderiza a página passando a lista de filiais
+#     return render_template('cadastro_promotores', filiais=FILIAIS)
+
+# if __name__ == '__main__':
+#     print("Iniciando o servidor Flask...")
+#     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+# ===================================================================
+# INÍCIO DAS NOVAS ROTAS PARA CADASTRO E VISUALIZAÇÃO DE PROMOTORES
+# ===================================================================
+
+# Rota para renderizar a página de cadastro de promotores
+@app.route('/cadastro_promotores.html')
+@login_required
+def cadastro_promotores():
+    # Supondo que o nome do seu arquivo HTML seja 'cadastro_promotores.html'
+    return render_template('cadastro_promotores.html')
+
+# Rota para renderizar a página de visualização de rotas
+@app.route('/visualizacao_rotas.html')
+@login_required
+def visualizacao_rotas():
+    # Supondo que o nome do seu arquivo HTML seja 'visualizacao_rotas.html'
+    return render_template('visualizacao_rotas.html')
+
+# Endpoint da API para salvar um novo promotor e suas rotas
+@app.route('/api/promotores', methods=['POST'])
+@login_required
+def add_promoter_api():
+    data = request.get_json()
+    
+    # Validação básica de dados
+    if not data or not data.get('promoter_name'):
+        return jsonify({'error': 'Nome do promotor é obrigatório'}), 400
+
+    promoter_info = {
+        'nome': data.get('promoter_name'),
+        'marca_fornecedor': data.get('brand'),
+        'email': data.get('promoter_email'),
+        'telefone': data.get('promoter_phone'),
+        'foto_url': data.get('promoter_photo'), # Idealmente, aqui seria a lógica de upload
+        'responsavel_gestor': data.get('manager_name'),
+        'email_gestor': data.get('manager_email'),
+        'contato_gestor': data.get('manager_contact')
+    }
+    
+    routes_info = data.get('routes', [])
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Falha na conexão com o banco de dados'}), 500
+    
+    cursor = conn.cursor()
+    
+    try:
+        # Inserir na tabela 'promotores'
+        promoter_query = """
+            INSERT INTO promotores (nome, marca_fornecedor, email, telefone, foto_url, responsavel_gestor, email_gestor, contato_gestor)
+            VALUES (%(nome)s, %(marca_fornecedor)s, %(email)s, %(telefone)s, %(foto_url)s, %(responsavel_gestor)s, %(email_gestor)s, %(contato_gestor)s)
+        """
+        cursor.execute(promoter_query, promoter_info)
+        id_promotor = cursor.lastrowid
+
+        # Inserir na tabela 'rotas' se houver rotas
+        if routes_info and id_promotor:
+            route_query = """
+                INSERT INTO rotas (id_promotor, loja, dia_semana, hora_entrada, hora_saida)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            route_values = [
+                (
+                    id_promotor,
+                    route.get('store'),
+                    route.get('day'),
+                    route.get('start_time') or None,
+                    route.get('end_time') or None
+                ) for route in routes_info if route.get('store') and route.get('day')
+            ]
+            
+            if route_values:
+                cursor.executemany(route_query, route_values)
+
+        conn.commit()
+        return jsonify({'message': 'Promotor e rotas cadastrados com sucesso!', 'id_promotor': id_promotor}), 201
+
+    except mysql.connector.Error as err:
+        conn.rollback()
+        print(f"Erro de SQL: {err}")
+        return jsonify({'error': f'Erro ao salvar no banco de dados: {err}'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# Endpoint da API para buscar todas as rotas
+@app.route('/api/rotas', methods=['GET'])
+@login_required
+def get_all_routes_api():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Falha na conexão com o banco de dados'}), 500
+    
+    cursor = conn.cursor(dictionary=True)
+    
+    query = """
+        SELECT 
+            r.id,
+            p.nome AS promoterName,
+            p.foto_url AS promoterPhoto,
+            p.marca_fornecedor AS brand,
+            r.loja AS store,
+            r.dia_semana AS day,
+            TIME_FORMAT(r.hora_entrada, '%H:%i') AS startTime,
+            TIME_FORMAT(r.hora_saida, '%H:%i') AS endTime
+        FROM rotas r
+        JOIN promotores p ON r.id_promotor = p.id
+        ORDER BY p.nome, r.dia_semana;
+    """
+    
+    try:
+        cursor.execute(query)
+        routes = cursor.fetchall()
+        return jsonify(routes), 200
+    except mysql.connector.Error as err:
+        print(f"Erro de SQL: {err}")
+        return jsonify({'error': f'Erro ao buscar dados: {err}'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ===================================================================
+# FIM DAS NOVAS ROTAS
+# ===================================================================
 
 if __name__ == '__main__':
     print("Iniciando o servidor Flask...")
     app.run(debug=True, host='0.0.0.0', port=5000)
-

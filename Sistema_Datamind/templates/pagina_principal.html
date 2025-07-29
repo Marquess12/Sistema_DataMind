@@ -196,8 +196,15 @@
               onclick="abrirSelecionarCandidatos()"
               >Selecionar Candidatos</a
             >
-            <a href="/cadastro_promotores" onclick="abrirCadastroPromotores()"
+            <a
+              href="/cadastro_promotores.html"
+              onclick="abrirCadastroPromotores()"
               >Cadastro Promotores</a
+            >
+            <a
+              href="/visualizacao_rotas.html"
+              onclick="abrirVisualizacaoRotas()"
+              >Visualizar Rotas Promotores</a
             >
           </div>
         </div>
@@ -280,7 +287,14 @@
         console.log("Botão Consultar Estoque clicado.");
         window.location.href = "/consultas_avancadas";
       }
-
+      function abrirCadastroPromotores() {
+        console.log("Botão abrir promotores.");
+        window.location.href = "/cadastro_promotores.html";
+      }
+      function abrirVisualizacaoRotas() {
+        console.log("Botão abrir rotas.");
+        window.location.href = "/visualizacao_rotas.html";
+      }
       function logout() {
         console.log("Executando logout...");
         window.location.href = "/logout";
