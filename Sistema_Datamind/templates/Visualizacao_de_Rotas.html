@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visualização de Rotas</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Estilização base com a fonte Inter */
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Animação para os cards e linhas */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animated-item {
+        animation: fadeIn 0.4s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+      <header class="mb-8 flex justify-between items-center">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">Painel de Rotas</h1>
+          <p class="text-base text-gray-500 mt-1">
+            Visualize e filtre as rotas semanais dos promotores.
+          </p>
+        </div>
+        <button
+          id="toggle-view-btn"
+          class="flex items-center space-x-2 px-4 py-2 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-50 border border-gray-300 shadow-sm transition-all duration-200"
+        >
+          <!-- Ícone e texto serão atualizados via JS -->
+        </button>
+      </header>
+
+      <!-- Seção de Filtros -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end"
+        >
+          <div>
+            <label
+              for="filter-store"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Filtrar por Loja</label
+            >
+            <select
+              id="filter-store"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="all">Todas as Lojas</option>
+            </select>
+          </div>
+          <div>
+            <label
+              for="filter-day"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Filtrar por Dia</label
+            >
+            <select
+              id="filter-day"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="all">Todos os Dias</option>
+            </select>
+          </div>
+          <div>
+            <label
+              for="filter-brand"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Filtrar por Marca</label
+            >
+            <select
+              id="filter-brand"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="all">Todas as Marcas</option>
+            </select>
+          </div>
+          <div class="flex space-x-3">
+            <button
+              id="filter-btn"
+              class="w-full px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md transition-all duration-200"
+            >
+              Filtrar
+            </button>
+            <button
+              id="clear-filter-btn"
+              class="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-all duration-200"
+            >
+              Limpar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container das Visualizações -->
+      <div id="views-container">
+        <!-- Visualização em Colunas/Cards (Padrão) -->
+        <div
+          id="view-cards"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4"
+        >
+          <!-- As colunas dos dias da semana serão geradas aqui -->
+        </div>
+
+        <!-- Visualização em Tabela (Oculta por padrão) -->
+        <div
+          id="view-table"
+          class="hidden overflow-x-auto bg-white rounded-2xl shadow-lg"
+        >
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Promotor
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Dia da Semana
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Loja
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Marca
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Horário
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="routes-table-body"
+              class="bg-white divide-y divide-gray-200"
+            >
+              <!-- As linhas de rota serão geradas aqui -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- Dados de Exemplo (Mock Data) ---
+        const mockRoutes = [
+          {
+            id: 1,
+            promoterName: "João da Silva",
+            promoterPhoto: "https://placehold.co/100x100/A7F3D0/1F2937?text=JS",
+            brand: "Marca A",
+            store: "Sac Ponta Negra",
+            day: "segunda",
+            startTime: "08:00",
+            endTime: "12:00",
+          },
+          {
+            id: 2,
+            promoterName: "Maria Oliveira",
+            promoterPhoto: "https://placehold.co/100x100/FBCFE8/1F2937?text=MO",
+            brand: "Marca B",
+            store: "Sac Lagoa Nova",
+            day: "segunda",
+            startTime: "09:00",
+            endTime: "13:00",
+          },
+          {
+            id: 3,
+            promoterName: "Carlos Pereira",
+            promoterPhoto: "https://placehold.co/100x100/BFDBFE/1F2937?text=CP",
+            brand: "Marca C",
+            store: "Sac Norte Shopping",
+            day: "terca",
+            startTime: "10:00",
+            endTime: "14:00",
+          },
+          {
+            id: 4,
+            promoterName: "João da Silva",
+            promoterPhoto: "https://placehold.co/100x100/A7F3D0/1F2937?text=JS",
+            brand: "Marca A",
+            store: "Sac Maria Lacerda",
+            day: "quarta",
+            startTime: "08:00",
+            endTime: "12:00",
+          },
+          {
+            id: 5,
+            promoterName: "Ana Costa",
+            promoterPhoto: "https://placehold.co/100x100/FDE68A/1F2937?text=AC",
+            brand: "Marca B",
+            store: "Sac Ponta Negra",
+            day: "quarta",
+            startTime: "13:00",
+            endTime: "17:00",
+          },
+          {
+            id: 6,
+            promoterName: "Maria Oliveira",
+            promoterPhoto: "https://placehold.co/100x100/FBCFE8/1F2937?text=MO",
+            brand: "Marca B",
+            store: "Sac Parnamirim",
+            day: "quinta",
+            startTime: "09:00",
+            endTime: "18:00",
+          },
+          {
+            id: 7,
+            promoterName: "Carlos Pereira",
+            promoterPhoto: "https://placehold.co/100x100/BFDBFE/1F2937?text=CP",
+            brand: "Marca C",
+            store: "Sac Igapo",
+            day: "sexta",
+            startTime: "08:30",
+            endTime: "12:30",
+          },
+          {
+            id: 8,
+            promoterName: "João da Silva",
+            promoterPhoto: "https://placehold.co/100x100/A7F3D0/1F2937?text=JS",
+            brand: "Marca A",
+            store: "Sac Centro",
+            day: "sexta",
+            startTime: "14:00",
+            endTime: "18:00",
+          },
+          {
+            id: 9,
+            promoterName: "Ana Costa",
+            promoterPhoto: "https://placehold.co/100x100/FDE68A/1F2937?text=AC",
+            brand: "Marca B",
+            store: "Sac Alecim",
+            day: "sabado",
+            startTime: "09:00",
+            endTime: "13:00",
+          },
+        ];
+
+        const daysOfWeekMap = {
+          segunda: { name: "Segunda-feira", order: 1 },
+          terca: { name: "Terça-feira", order: 2 },
+          quarta: { name: "Quarta-feira", order: 3 },
+          quinta: { name: "Quinta-feira", order: 4 },
+          sexta: { name: "Sexta-feira", order: 5 },
+          sabado: { name: "Sábado", order: 6 },
+          domingo: { name: "Domingo", order: 7 },
+        };
+
+        const viewCardsContainer = document.getElementById("view-cards");
+        const viewTableContainer = document.getElementById("view-table");
+        const tableBody = document.getElementById("routes-table-body");
+        const filterStoreEl = document.getElementById("filter-store");
+        const filterDayEl = document.getElementById("filter-day");
+        const filterBrandEl = document.getElementById("filter-brand");
+        const filterBtn = document.getElementById("filter-btn");
+        const clearFilterBtn = document.getElementById("clear-filter-btn");
+        const toggleViewBtn = document.getElementById("toggle-view-btn");
+
+        let currentView = "cards"; // 'cards' or 'table'
+        let currentFilteredRoutes = [...mockRoutes];
+
+        // --- Funções de Renderização ---
+        function renderCardView(routes) {
+          viewCardsContainer.innerHTML = "";
+          const daysOfWeekArray = Object.entries(daysOfWeekMap).sort(
+            ([, a], [, b]) => a.order - b.order
+          );
+
+          daysOfWeekArray.forEach(([dayId, dayInfo]) => {
+            const dayColumn = document.createElement("div");
+            dayColumn.id = `day-${dayId}`;
+            dayColumn.className = "bg-gray-50 p-4 rounded-xl space-y-4";
+            dayColumn.innerHTML = `<h2 class="text-lg font-bold text-gray-800 text-center border-b pb-2">${dayInfo.name}</h2>`;
+            viewCardsContainer.appendChild(dayColumn);
+          });
+
+          routes.forEach((route) => {
+            const dayColumn = viewCardsContainer.querySelector(
+              `#day-${route.day}`
+            );
+            if (dayColumn) {
+              const card = document.createElement("div");
+              card.className =
+                "animated-item bg-white p-4 rounded-lg shadow-md border-l-4 border-indigo-500";
+              card.innerHTML = `
+                            <div class="flex items-center space-x-3">
+                                <img src="${route.promoterPhoto}" alt="${route.promoterName}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm">
+                                <div>
+                                    <p class="font-semibold text-gray-900">${route.promoterName}</p>
+                                    <p class="text-xs text-gray-500">${route.brand}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-t">
+                                <p class="text-sm font-medium text-gray-700">${route.store}</p>
+                                <p class="text-sm text-gray-500 flex items-center space-x-1 mt-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>${route.startTime} - ${route.endTime}</span>
+                                </p>
+                            </div>`;
+              dayColumn.appendChild(card);
+            }
+          });
+
+          viewCardsContainer.querySelectorAll(".bg-gray-50").forEach((col) => {
+            if (col.children.length === 1) {
+              col.innerHTML += `<p class="text-sm text-gray-400 text-center pt-4">Nenhuma rota agendada.</p>`;
+            }
+          });
+        }
+
+        function renderTableView(routes) {
+          tableBody.innerHTML = "";
+          if (routes.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-10 px-6 text-gray-500">Nenhuma rota encontrada.</td></tr>`;
+            return;
+          }
+
+          routes.sort(
+            (a, b) =>
+              daysOfWeekMap[a.day].order - daysOfWeekMap[b.day].order ||
+              a.startTime.localeCompare(b.startTime)
+          );
+
+          routes.forEach((route) => {
+            const row = document.createElement("tr");
+            row.className =
+              "animated-item hover:bg-gray-50 transition-colors duration-200";
+            row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap"><div class="flex items-center"><div class="flex-shrink-0 h-10 w-10"><img class="h-10 w-10 rounded-full object-cover" src="${
+                          route.promoterPhoto
+                        }" alt=""></div><div class="ml-4"><div class="text-sm font-medium text-gray-900">${
+              route.promoterName
+            }</div></div></div></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-gray-900">${
+                          daysOfWeekMap[route.day].name
+                        }</div></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><div class="text-sm text-gray-900">${
+                          route.store
+                        }</div></td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">${
+                          route.brand
+                        }</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${
+                          route.startTime
+                        } - ${route.endTime}</td>`;
+            tableBody.appendChild(row);
+          });
+        }
+
+        function renderCurrentView() {
+          if (currentView === "cards") {
+            renderCardView(currentFilteredRoutes);
+          } else {
+            renderTableView(currentFilteredRoutes);
+          }
+        }
+
+        // --- Lógica de Filtros e Visualização ---
+        function populateFilters() {
+          const stores = [...new Set(mockRoutes.map((r) => r.store))].sort();
+          const brands = [...new Set(mockRoutes.map((r) => r.brand))].sort();
+          const days = Object.entries(daysOfWeekMap).sort(
+            ([, a], [, b]) => a.order - b.order
+          );
+
+          stores.forEach(
+            (store) =>
+              (filterStoreEl.innerHTML += `<option value="${store}">${store}</option>`)
+          );
+          brands.forEach(
+            (brand) =>
+              (filterBrandEl.innerHTML += `<option value="${brand}">${brand}</option>`)
+          );
+          days.forEach(
+            ([id, data]) =>
+              (filterDayEl.innerHTML += `<option value="${id}">${data.name}</option>`)
+          );
+        }
+
+        function applyFilters() {
+          const selectedStore = filterStoreEl.value;
+          const selectedDay = filterDayEl.value;
+          const selectedBrand = filterBrandEl.value;
+
+          currentFilteredRoutes = mockRoutes.filter(
+            (route) =>
+              (selectedStore === "all" || route.store === selectedStore) &&
+              (selectedDay === "all" || route.day === selectedDay) &&
+              (selectedBrand === "all" || route.brand === selectedBrand)
+          );
+          renderCurrentView();
+        }
+
+        function clearFilters() {
+          filterStoreEl.value = "all";
+          filterDayEl.value = "all";
+          filterBrandEl.value = "all";
+          currentFilteredRoutes = [...mockRoutes];
+          renderCurrentView();
+        }
+
+        function updateToggleButon() {
+          if (currentView === "cards") {
+            toggleViewBtn.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18M3 6h18M3 18h18"></path></svg>
+                        <span>Visualizar Tabela</span>`;
+          } else {
+            toggleViewBtn.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        <span>Visualizar em Cards</span>`;
+          }
+        }
+
+        function toggleView() {
+          viewCardsContainer.classList.toggle("hidden");
+          viewTableContainer.classList.toggle("hidden");
+          currentView = currentView === "cards" ? "table" : "cards";
+          updateToggleButon();
+          renderCurrentView(); // Re-renderiza na nova visualização com os filtros atuais
+        }
+
+        // --- Inicialização ---
+        populateFilters();
+        updateToggleButon();
+        renderCurrentView();
+
+        filterBtn.addEventListener("click", applyFilters);
+        clearFilterBtn.addEventListener("click", clearFilters);
+        toggleViewBtn.addEventListener("click", toggleView);
+      });
+    </script>
+  </body>
+</html>
